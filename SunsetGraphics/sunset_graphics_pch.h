@@ -46,5 +46,13 @@ inline void ThrowIfFailed(HRESULT hr)
 #define SUNSET_GRAPHICS_API extern "C" __declspec(dllimport)
 #endif
 
+#ifdef SUNSET_GRAPHICS_EXPORTS
+#define SUNSET_GRAPHICS_CLASS __declspec(dllexport)
+#else
+#define SUNSET_GRAPHICS_CLASS __declspec(dllimport)
+#endif
+
+#define APP_NUM_BACK_BUFFERS 2 
+
 #endif // !_SUNSET_GRAPHICS_PCH_H_
 

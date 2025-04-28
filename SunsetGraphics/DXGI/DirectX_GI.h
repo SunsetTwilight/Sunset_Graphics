@@ -2,15 +2,16 @@
 #define _DIRECTX_GI
 
 #include "../sunset_graphics_pch.h"
+#include "DirectX_GI_def.h"
 
-#include <dxgi1_6.h>
 #include <d3dcommon.h>
+
+
+
+struct ID3D12CommandQueue;
 
 namespace DXGI
 {
-	typedef IDXGIFactory4 DXGI_Factory;
-	typedef IDXGIAdapter1 DXGI_Adapter;
-
 //------------------------------------------------------------------------------------------------
 //関数プロトタイプ宣言	
 //------------------------------------------------------------------------------------------------
@@ -20,7 +21,8 @@ namespace DXGI
 	BOOL DirectX_GI_Init();		//DirectX GraphicInterface系の初期化
 	BOOL DirectX_GI_CleanUp();	//DirectX GraphicInterface系の解放
 	
-	BOOL CreateFactory();	//Factoryの生成
+	//Factoryの生成
+	BOOL CreateFactory();				
 
 	SUNSET_GRAPHICS_API void GetUseGPUName(WCHAR pName[128]);
 	SUNSET_GRAPHICS_API BOOL GetAdapterForName(

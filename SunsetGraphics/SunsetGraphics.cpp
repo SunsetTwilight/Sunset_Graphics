@@ -22,10 +22,8 @@ BOOL Sunset_Graphics_Init()
 
 	BOOL resultLoadLibrary = TRUE;
 
-	resultLoadLibrary &= DXGI::DirectX_GI_LoadLibraryAndModule();
-	resultLoadLibrary &= DX12::Direct3D_12_LoadLibraryAndModule();
-
-	if (resultLoadLibrary == TRUE) return FALSE;
+	if (!DXGI::DirectX_GI_LoadLibraryAndModule()) return FALSE;
+	if (!DX12::Direct3D_12_LoadLibraryAndModule()) return FALSE;
 
 	DXGI::DirectX_GI_Init();
 	DX12::Direct3D_12_Init();

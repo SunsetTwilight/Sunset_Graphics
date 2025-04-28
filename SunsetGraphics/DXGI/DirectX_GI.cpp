@@ -1,10 +1,7 @@
 #include "DirectX_GI.h"
-
 #include "../sunset_graphics_pch.h"
 
 #include <dxgi1_6.h>
-
-//#pragma comment(lib, "dxgi.lib")
 
 #include <d3d11_4.h>
 #include <d3d12.h>
@@ -31,7 +28,7 @@ namespace DXGI
 	DXGI_FUNC CreateDXGIFactory;
 	DXGI_FUNC DXGIGetDebugInterface;
 
-	ComPtr<DXGI_Factory>				m_factory{};
+	ComPtr<DXGI_Factory>				g_factory{};
 
 	ComPtr<DXGI_Adapter>				m_use_adapter{};
 	std::vector<ComPtr<DXGI_Adapter>>	m_adapters{};
@@ -88,7 +85,7 @@ namespace DXGI
 				IDXGIAdapter1* tmpAdapter;
 
 				UINT count = 0;
-				while (m_factory->EnumAdapters1(count, &tmpAdapter) != DXGI_ERROR_NOT_FOUND) {
+				while (g_factory->EnumAdapters1(count, &tmpAdapter) != DXGI_ERROR_NOT_FOUND) {
 					m_adapters.push_back(tmpAdapter);
 					tmpAdapter->Release();
 					count++;
@@ -124,7 +121,7 @@ namespace DXGI
 			m_adapters.pop_back(); //最終要素削除
 		}
 
-		if (m_factory.Reset() != 0) {
+		if (g_factory.Reset() != 0) {
 			//Error(参照カウントが１以上なので、どこかで使用されたまま)
 			retCleanUp = FALSE;
 		}
@@ -143,7 +140,7 @@ namespace DXGI
 		BOOL retCreate = TRUE;
 
 		UINT dbgFlag = (SGraphics::isDebug) ? (DXGI_CREATE_FACTORY_DEBUG) : 0;
-		HRESULT hr = CreateDXGIFactory(dbgFlag, IID_PPV_ARGS(m_factory.GetAddressOf()));
+		HRESULT hr = CreateDXGIFactory(dbgFlag, IID_PPV_ARGS(g_factory.GetAddressOf()));
 		_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 
 		if (FAILED(hr)) {
@@ -152,6 +149,8 @@ namespace DXGI
 
 		return retCreate;
 	}
+
+	
 
 	//------------------------------------------------------------------------------------------------
 	// 内容　　現在使用中のアダプター（ビデオカード）の名前を取得する
@@ -183,7 +182,7 @@ namespace DXGI
 	//------------------------------------------------------------------------------------------------
 	SUNSET_GRAPHICS_API BOOL SetWindowAssociation(HWND hWnd, UINT flags)
 	{
-		HRESULT hr = m_factory->MakeWindowAssociation(hWnd, flags);
+		HRESULT hr = g_factory->MakeWindowAssociation(hWnd, flags);
 		_ASSERT_EXPR(FAILED(hr), hr_trace(hr));
 		return TRUE;
 	}
@@ -197,14 +196,14 @@ namespace DXGI
 	SUNSET_GRAPHICS_API BOOL GetAdapterForName(IDXGIAdapter1** pAdapter, const wchar_t* findName)
 	{
 		if (findName == nullptr ||
-			m_factory.operator Microsoft::WRL::Details::BoolType()) {
+			g_factory.operator Microsoft::WRL::Details::BoolType()) {
 			return FALSE;
 		}
 
 		BOOL adapterFind = FALSE;
 		
 		int count = 0;
-		while (m_factory->EnumAdapters(count, (IDXGIAdapter**)pAdapter) != DXGI_ERROR_NOT_FOUND)
+		while (g_factory->EnumAdapters(count, (IDXGIAdapter**)pAdapter) != DXGI_ERROR_NOT_FOUND)
 		{	
 			DXGI_ADAPTER_DESC adesc = {};
 			(*pAdapter)->GetDesc(&adesc);
@@ -231,7 +230,7 @@ namespace DXGI
 		D3D_FEATURE_LEVEL minimumsLevel
 	)
 	{
-		if (!m_factory.operator Microsoft::WRL::Details::BoolType()) {
+		if (!g_factory.operator Microsoft::WRL::Details::BoolType()) {
 			return FALSE;
 		}
 
@@ -240,7 +239,7 @@ namespace DXGI
 
 		while (adapterFound == FALSE) //未発見なら継続
 		{	
-			if (m_factory->EnumAdapters(index, (IDXGIAdapter**)pAdapter) == DXGI_ERROR_NOT_FOUND) {
+			if (g_factory->EnumAdapters(index, (IDXGIAdapter**)pAdapter) == DXGI_ERROR_NOT_FOUND) {
 				break; //未発見（ループ終了）
 			}
 			++index; //次の要素を指す
@@ -272,7 +271,7 @@ namespace DXGI
 	//------------------------------------------------------------------------------------------------
 	SUNSET_GRAPHICS_API DXGI_Factory* GetFactory()
 	{
-		return m_factory.Get();
+		return g_factory.Get();
 	}
 
 	//------------------------------------------------------------------------------------------------

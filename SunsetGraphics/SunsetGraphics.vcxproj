@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -163,17 +163,46 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Direct3D12\Command.cpp" />
+    <ClCompile Include="Direct3D12\DepthStencilView.cpp" />
+    <ClCompile Include="Direct3D12\DescriptorHeap.cpp" />
     <ClCompile Include="Direct3D12\Direct3D_12.cpp" />
+    <ClCompile Include="Direct3D12\GraphicsPipelineState.cpp" />
+    <ClCompile Include="Direct3D12\RenderTargets.cpp" />
+    <ClCompile Include="Direct3D12\RenderTargetView.cpp" />
+    <ClCompile Include="Direct3D12\RootSignature.cpp" />
+    <ClCompile Include="Direct3D12\Shader.cpp" />
+    <ClCompile Include="Direct3D12\ShaderResourceView.cpp" />
+    <ClCompile Include="Direct3D12\ShaderVariable.cpp" />
+    <ClCompile Include="Direct3D12\VertexBuffer.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="DXGI\DirectX_GI.cpp" />
+    <ClCompile Include="DXGI\SwapChain.cpp" />
+    <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="SunsetGraphics.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Direct3D12\Command.h" />
     <ClInclude Include="Direct3D12\d3dx12.h" />
+    <ClInclude Include="Direct3D12\DepthStencilView.h" />
+    <ClInclude Include="Direct3D12\DescriptorHeap.h" />
     <ClInclude Include="Direct3D12\Direct3D_12.h" />
+    <ClInclude Include="Direct3D12\Direct3D_12_def.h" />
+    <ClInclude Include="Direct3D12\GraphicsPipelineState.h" />
+    <ClInclude Include="Direct3D12\RenderTargets.h" />
+    <ClInclude Include="Direct3D12\RenderTargetView.h" />
+    <ClInclude Include="Direct3D12\RootSignature.h" />
+    <ClInclude Include="Direct3D12\Shader.h" />
+    <ClInclude Include="Direct3D12\ShaderResourceView.h" />
+    <ClInclude Include="Direct3D12\ShaderVariable.h" />
+    <ClInclude Include="Direct3D12\VertexBuffer.h" />
     <ClInclude Include="DXGI\DirectX_GI.h" />
+    <ClInclude Include="DXGI\DirectX_GI_def.h" />
+    <ClInclude Include="DXGI\SwapChain.h" />
+    <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="sunset_graphics_pch.h" />
     <ClInclude Include="SunsetGraphics.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

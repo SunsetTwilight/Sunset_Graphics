@@ -27,18 +27,18 @@ namespace DX12
 
 	HMODULE	m_D3D12_DLL;
 
-	PFN_D3D12_SERIALIZE_ROOT_SIGNATURE						D3D12SerializeRootSignature;
+	PFN_D3D12_SERIALIZE_ROOT_SIGNATURE						D3D12SerializeRootSignature = nullptr;
 	PFN_D3D12_CREATE_ROOT_SIGNATURE_DESERIALIZER			D3D12CreateRootSignatureDeserializer;
 	PFN_D3D12_SERIALIZE_VERSIONED_ROOT_SIGNATURE			D3D12SerializeVersionedRootSignature;
 	PFN_D3D12_CREATE_VERSIONED_ROOT_SIGNATURE_DESERIALIZER	D3D12CreateVersionedRootSignatureDeserializer;
 	
-	PFN_D3D12_CREATE_DEVICE									D3D12CreateDevice;
-	PFN_D3D12_GET_DEBUG_INTERFACE							D3D12GetDebugInterface;
+	PFN_D3D12_CREATE_DEVICE									D3D12CreateDevice = nullptr;
+	PFN_D3D12_GET_DEBUG_INTERFACE							D3D12GetDebugInterface = nullptr;
 
-	PFN_D3D12_GET_INTERFACE									D3D12GetInterface;
-
+	PFN_D3D12_GET_INTERFACE									D3D12GetInterface = nullptr;
+	
 	ComPtr<ID3D12Debug>			m_d3d12_debug{};
-	ComPtr<ID3D12Device>		m_d3d12_device{};	//Direct3D12のデバイスの実体
+	ComPtr<ID3D12Device>		g_d3d12_device{};	//Direct3D12のデバイスの実体
 	ComPtr<ID3D12CommandQueue>	cmd_queue{};
 
 //------------------------------------------------------------------------------------------------
@@ -63,6 +63,27 @@ namespace DX12
 		if (D3D12CreateDevice == NULL) {
 			//関数の読み込み：失敗
 			MessageBox(NULL, L"ErrorCode_0003 : Get Process D3D12CreateDevice()", L"Failed                                                                                                                         ", MB_OK | MB_ICONERROR);
+			MessageBox(NULL, L"Exit Application", L"ErrorCode : 0003                                                                                                               ", MB_OK | MB_ICONERROR);
+			exit(0003);
+
+			return FALSE;
+		}
+
+		//関数を読み込む
+		D3D12GetDebugInterface = (PFN_D3D12_GET_DEBUG_INTERFACE)GetProcAddress(m_D3D12_DLL, "D3D12GetDebugInterface");
+		if (D3D12GetDebugInterface == NULL) {
+			//関数の読み込み：失敗
+			MessageBox(NULL, L"ErrorCode_0003 : Get Process D3D12GetDebugInterface()", L"Failed                                                                                                                         ", MB_OK | MB_ICONERROR);
+			MessageBox(NULL, L"Exit Application", L"ErrorCode : 0003                                                                                                               ", MB_OK | MB_ICONERROR);
+			exit(0003);
+
+			return FALSE;
+		}
+
+		D3D12SerializeRootSignature = (PFN_D3D12_SERIALIZE_ROOT_SIGNATURE)GetProcAddress(m_D3D12_DLL, "D3D12SerializeRootSignature");
+		if (D3D12SerializeRootSignature == NULL) {
+			//関数の読み込み：失敗
+			MessageBox(NULL, L"ErrorCode_0003 : Get Process D3D12SerializeRootSignature()", L"Failed                                                                                                                         ", MB_OK | MB_ICONERROR);
 			MessageBox(NULL, L"Exit Application", L"ErrorCode : 0003                                                                                                               ", MB_OK | MB_ICONERROR);
 			exit(0003);
 
@@ -108,7 +129,7 @@ namespace DX12
 			//Error(参照カウントが１以上なので、どこかで使用されたまま)
 			retCleanUp = FALSE;	//異常
 		}
-		if (m_d3d12_device.Reset() != 0) {	
+		if (g_d3d12_device.Reset() != 0) {
 			//Error(参照カウントが１以上なので、どこかで使用されたまま)
 			retCleanUp = FALSE;	//異常
 		}
@@ -128,20 +149,27 @@ namespace DX12
 #if defined(_DEBUG)
 		HRESULT hr = S_OK;
 
-		hr = D3D12GetDebugInterface(IID_PPV_ARGS(m_d3d12_debug.GetAddressOf()));
-		_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+		if (D3D12GetDebugInterface != nullptr) {
 
-		if (FAILED(hr)) {
-			retEnable = FALSE;
-		}
+			ComPtr<ID3D12Debug> debugController;
+			hr = D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf()));
+			_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
 
-		if (retEnable) {
-			m_d3d12_debug->EnableDebugLayer();
-
-			ComPtr<ID3D12Debug3> debug3;
-			if (SUCCEEDED(m_d3d12_debug.As(&debug3))) {
-				debug3->SetEnableGPUBasedValidation(TRUE);	//GPU ベースの検証
+			if (FAILED(hr)) {
+				retEnable = FALSE;
 			}
+
+			if (retEnable) {
+				debugController->EnableDebugLayer();
+
+				ComPtr<ID3D12Debug3> debug3;
+				if (SUCCEEDED(debugController.As(&debug3))) {
+					debug3->SetEnableGPUBasedValidation(TRUE);	//GPU ベースの検証
+				}
+			}
+		}
+		else {
+			retEnable = FALSE;
 		}
 #endif	
 		return retEnable;
@@ -193,7 +221,7 @@ namespace DX12
 		hr = D3D12CreateDevice(
 			adapter1.Get(),
 			minimumLevel,
-			IID_PPV_ARGS(m_d3d12_device.GetAddressOf())
+			IID_PPV_ARGS(g_d3d12_device.GetAddressOf())
 		);
 		if ( FAILED(hr) ) { 
 			//生成失敗
@@ -206,7 +234,7 @@ namespace DX12
 
 	SUNSET_GRAPHICS_API ID3D12Device* GetDevice()
 	{
-		return m_d3d12_device.Get();
+		return g_d3d12_device.Get();
 	}
 
 	SUNSET_GRAPHICS_API ID3D12CommandQueue* GetCommandQueue()
@@ -224,7 +252,7 @@ namespace DX12
 		cmdQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 		cmdQueueDesc.Type = type;
 
-		HRESULT hr = m_d3d12_device->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(cmd_queue.GetAddressOf()));
+		HRESULT hr = g_d3d12_device->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(cmd_queue.GetAddressOf()));
 		_ASSERT_EXPR(FAILED(hr), hr_trace(hr));
 		
 		return TRUE;

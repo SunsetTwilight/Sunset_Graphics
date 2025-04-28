@@ -33,6 +33,45 @@
     <ClCompile Include="SunsetGraphics.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DXGI\SwapChain.cpp">
+      <Filter>DXGI</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\RenderTargetView.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\DepthStencilView.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\RenderTargets.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\DescriptorHeap.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\Command.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\ShaderResourceView.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\VertexBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\GraphicsPipelineState.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\RootSignature.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\Shader.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\ShaderVariable.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Direct3D12\d3dx12.h">
@@ -49,6 +88,54 @@
     </ClInclude>
     <ClInclude Include="SunsetGraphics.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXGI\SwapChain.h">
+      <Filter>DXGI</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\RenderTargetView.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\Direct3D_12_def.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="DXGI\DirectX_GI_def.h">
+      <Filter>DXGI</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\DepthStencilView.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\RenderTargets.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\DescriptorHeap.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\Command.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\ShaderResourceView.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\VertexBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\GraphicsPipelineState.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\RootSignature.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\Shader.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\ShaderVariable.h">
+      <Filter>Direct3D12</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
