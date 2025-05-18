@@ -7,6 +7,7 @@
 #include <d3dcommon.h>
 
 struct ID3D12RootSignature;
+struct ID3D12GraphicsCommandList;
 
 namespace DX12
 {
@@ -15,14 +16,18 @@ namespace DX12
 	class RootSignature
 	{
 	public:
-		RootSignature();
-		~RootSignature();
+		SUNSET_GRAPHICS_CLASS RootSignature();
+		SUNSET_GRAPHICS_CLASS ~RootSignature();
 
-		BOOL FetchRootSignatureFromShader(Shader* pShader);
+		SUNSET_GRAPHICS_CLASS BOOL FetchRootSignatureFromShader(Shader* pShader);
+
+		SUNSET_GRAPHICS_CLASS void Active(ID3D12GraphicsCommandList* pCmdList);
 
 	private:
 		ComPtr<ID3D12RootSignature> pRootSignature;
 		ComPtr<ID3DBlob> pRootSignatureBlob;
+
+		friend class GraphicsPipelineState;
 	};
 }
 

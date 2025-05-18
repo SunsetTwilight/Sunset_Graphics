@@ -15,21 +15,21 @@ namespace DX12
 	class VertexBuffer
 	{
 	public:
-		VertexBuffer();
-		~VertexBuffer();
+		SUNSET_GRAPHICS_CLASS VertexBuffer();
+		SUNSET_GRAPHICS_CLASS ~VertexBuffer();
 
-		void CreateVertexBuffer(
+		SUNSET_GRAPHICS_CLASS void CreateVertexBuffer(
 			UINT _typeSize, 
 			void* _pVertice,
 			UINT _vertexCount
 		);
 
-		void Mapping(
+		SUNSET_GRAPHICS_CLASS void Mapping(
 			void* _pVertice, 
 			UINT _vertexCount
 		);
 
-		void Draw(ID3D12GraphicsCommandList* _pCmdList);
+		SUNSET_GRAPHICS_CLASS void Draw(ID3D12GraphicsCommandList* _pCmdList);
 
 	private:
 		ComPtr<ID3D12Resource> resource;

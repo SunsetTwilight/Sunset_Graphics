@@ -237,3 +237,19 @@ void FrameBuffer::SetFenceValue(UINT64 value)
 {
 	
 }
+
+BOOL FrameBuffer::GetViewRect(D3D12_RECT* rc)
+{
+	DXGI_SWAP_CHAIN_DESC1 desc;
+	DXGI::DXGI_SwapChain* pSC = pSwapChain->GetSwapChain();
+
+	if (pSC == nullptr) return FALSE;
+	if (pSC->GetDesc1(&desc) != S_OK) return FALSE;
+
+	rc->left = 0;
+	rc->top = 0;
+	rc->right = desc.Width;
+	rc->bottom = desc.Height;
+
+	return TRUE;
+}

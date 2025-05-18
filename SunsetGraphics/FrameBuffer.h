@@ -5,6 +5,8 @@
 #include "Direct3D12/Direct3D_12_def.h"
 #include "DXGI/DirectX_GI_def.h"
 
+#include <d3d12.h>
+
 #include <memory>
 
 struct ID3D12CommandQueue;
@@ -47,6 +49,8 @@ public:
 
 	SUNSET_GRAPHICS_CLASS HANDLE GetSwapChainHandle();
 	SUNSET_GRAPHICS_CLASS void SetFenceValue(UINT64 value);
+
+	SUNSET_GRAPHICS_CLASS BOOL GetViewRect(D3D12_RECT* rc);
 
 private:
 	HWND hWnd;

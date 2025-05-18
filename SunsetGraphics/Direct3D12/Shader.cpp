@@ -59,6 +59,7 @@ namespace DX12
 					errstr.begin()
 				);
 				OutputDebugStringA(errstr.c_str());
+				MessageBoxA(NULL, errstr.c_str(), "Compile Error ShaderCode", NULL);
 			}
 			else {
 				/* ƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½ */

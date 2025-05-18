@@ -99,23 +99,19 @@ namespace DX12
 		//if (fence->GetCompletedValue() < m_fenceValue)
 		//{
 		//	auto event = CreateEvent(nullptr, false, false, nullptr);
-
 		//	// 完了時にイベントを設定.
 		//	auto hr = fence->SetEventOnCompletion(m_fenceValue, event);
 		//	if (FAILED(hr))
 		//	{
 		//		return;
 		//	}
-
 		//	// 待機処理.
 		//	if (WAIT_OBJECT_0 != WaitForSingleObject(event, INFINITE))
 		//	{
 		//		return;
 		//	}
-
 		//	CloseHandle(event);
 		//}
-
 
 		return;
 	}

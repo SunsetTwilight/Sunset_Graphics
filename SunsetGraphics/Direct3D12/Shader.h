@@ -34,25 +34,25 @@ namespace DX12
 	class Shader
 	{
 	public:
-		Shader();
-		~Shader();
+		SUNSET_GRAPHICS_CLASS Shader();
+		SUNSET_GRAPHICS_CLASS ~Shader();
 
-		static BOOL ShaderCompile(
+		SUNSET_GRAPHICS_CLASS static BOOL ShaderCompile(
 			ID3DBlob** ppCode, 
 			LPCWSTR pFileName, 
 			LPCSTR pEntryPoint, 
 			LPCSTR pTarget
 		);
 
-		ID3DBlob* GetBlob();
+		SUNSET_GRAPHICS_CLASS ID3DBlob* GetBlob();
 
-		ShaderType GetType();
+		SUNSET_GRAPHICS_CLASS ShaderType GetType();
 		
-		BOOL CreateVertexShaderEx(LPCWSTR pFileName);
-		BOOL CreatePixelShaderEx(LPCWSTR pFileName);
-		BOOL CreateGeometryShaderEx(LPCWSTR pFileName);
-		BOOL CreateHullShaderEx(LPCWSTR pFileName);
-		BOOL CreateDomainShaderEx(LPCWSTR pFileName);
+		SUNSET_GRAPHICS_CLASS BOOL CreateVertexShaderEx(LPCWSTR pFileName);
+		SUNSET_GRAPHICS_CLASS BOOL CreatePixelShaderEx(LPCWSTR pFileName);
+		SUNSET_GRAPHICS_CLASS BOOL CreateGeometryShaderEx(LPCWSTR pFileName);
+		SUNSET_GRAPHICS_CLASS BOOL CreateHullShaderEx(LPCWSTR pFileName);
+		SUNSET_GRAPHICS_CLASS BOOL CreateDomainShaderEx(LPCWSTR pFileName);
 
 	private:
 		

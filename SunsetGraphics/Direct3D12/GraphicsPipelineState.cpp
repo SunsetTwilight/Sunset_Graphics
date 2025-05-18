@@ -1,5 +1,7 @@
 #include "GraphicsPipelineState.h"
 
+#include "RootSignature.h"
+
 #include <d3d12.h>
 #include <dxgi1_6.h>
 
@@ -14,15 +16,13 @@ namespace DX12
 
 	GraphicsPipelineState::GraphicsPipelineState()
 	{
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC desc;
-
 		desc.pRootSignature = nullptr;
 
-		desc.VS;
-		desc.PS;
-		desc.DS;
-		desc.HS;
-		desc.GS;
+		desc.VS = D3D12_SHADER_BYTECODE();
+		desc.PS = D3D12_SHADER_BYTECODE();
+		desc.DS = D3D12_SHADER_BYTECODE();
+		desc.HS = D3D12_SHADER_BYTECODE();
+		desc.GS = D3D12_SHADER_BYTECODE();
 
 		desc.StreamOutput;
 
@@ -55,8 +55,6 @@ namespace DX12
 		desc.NodeMask = 0;
 		desc.CachedPSO;
 		desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-
-		g_d3d12_device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(pPipelineState.GetAddressOf()));
 	}
 
 	GraphicsPipelineState::~GraphicsPipelineState()
@@ -64,5 +62,42 @@ namespace DX12
 
 	}
 
+	void GraphicsPipelineState::CreateGraphicsPipeline()
+	{
+		g_d3d12_device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(pPipelineState.GetAddressOf()));
+	}
 
+	void GraphicsPipelineState::SetRootSignature(RootSignature* pRootSignature)
+	{
+		auto ptr = pRootSignature->pRootSignature.Get();
+		if (ptr != nullptr) {
+			desc.pRootSignature = ptr;
+		}
+	}
+
+	void GraphicsPipelineState::SetVertexShader(ID3DBlob* pBlob)
+	{
+		desc.VS.pShaderBytecode = pBlob->GetBufferPointer();
+		desc.VS.BytecodeLength = pBlob->GetBufferSize();
+	}
+
+	void GraphicsPipelineState::SetPixelShader(ID3DBlob* pBlob)
+	{
+		desc.PS.pShaderBytecode = pBlob->GetBufferPointer();
+		desc.PS.BytecodeLength = pBlob->GetBufferSize();
+	}
+
+	void GraphicsPipelineState::SetInputElementDesc(
+		D3D12_INPUT_ELEMENT_DESC* pInputElementDesc,
+		UINT numElements
+	)
+	{
+		desc.InputLayout.pInputElementDescs = pInputElementDesc;
+		desc.InputLayout.NumElements = numElements;
+	}
+
+	void GraphicsPipelineState::Active(ID3D12GraphicsCommandList* pCmdList)
+	{
+		pCmdList->SetPipelineState(pPipelineState.Get());
+	}
 }

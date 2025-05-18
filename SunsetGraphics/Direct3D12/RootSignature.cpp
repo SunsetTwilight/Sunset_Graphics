@@ -18,7 +18,7 @@ namespace DX12
 
 	RootSignature::RootSignature()
 	{
-		D3D12_ROOT_SIGNATURE_DESC desc;
+		/*D3D12_ROOT_SIGNATURE_DESC desc;
 		desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 		ComPtr<ID3DBlob> pErrorBlob;
@@ -35,7 +35,7 @@ namespace DX12
 			pRootSignatureBlob->GetBufferPointer(),
 			pRootSignatureBlob->GetBufferSize(),
 			IID_PPV_ARGS(pRootSignature.GetAddressOf())
-		);
+		);*/
 	}
 
 	RootSignature::~RootSignature()
@@ -76,5 +76,9 @@ namespace DX12
 		}
 
 		return TRUE;
+	}
+	SUNSET_GRAPHICS_CLASS void RootSignature::Active(ID3D12GraphicsCommandList* pCmdList)
+	{
+		pCmdList->SetGraphicsRootSignature(pRootSignature.Get());
 	}
 }
