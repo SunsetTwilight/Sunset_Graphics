@@ -16,29 +16,32 @@ struct D3D12_CPU_DESCRIPTOR_HANDLE;
 struct D3D12_GPU_DESCRIPTOR_HANDLE;
 struct ID3D12DescriptorHeap;
 
-namespace DX12
+class SUNSET_GRAPHICS_CLASS DescriptorHeap
 {
-	class DescriptorHeap
-	{
-	public:
-		SUNSET_GRAPHICS_CLASS DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type);
-		SUNSET_GRAPHICS_CLASS ~DescriptorHeap();
+public:
+	DescriptorHeap() {}
+	virtual ~DescriptorHeap() {}
 
-		SUNSET_GRAPHICS_CLASS BOOL CreateDescriptorHeap(
-			UINT numDescriptor = 1,
-			D3D12_DESCRIPTOR_HEAP_FLAGS flagDescriptor = D3D12_DESCRIPTOR_HEAP_FLAG_NONE
-		);
+	virtual ID3D12DescriptorHeap* GetDescriptorHeap() = 0;
+	virtual ID3D12DescriptorHeap** GetAddressDescriptorHeap() = 0;
 
-		SUNSET_GRAPHICS_CLASS CD3DX12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(UINT bbIndex = 0);
-		SUNSET_GRAPHICS_CLASS CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(UINT bbIndex = 0);
+	virtual CD3DX12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(UINT bbIndex = 0) = 0;
+	virtual CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(UINT bbIndex = 0) = 0;
 
-	protected:
-		ComPtr<ID3D12DescriptorHeap> m_heap;
+	virtual UINT GetDescriptorHandleIncrementSize() = 0;
+};
 
-	private:
-		D3D12_DESCRIPTOR_HEAP_TYPE m_heapType;
-		UINT m_numDescriptor;
-	};
-}
+typedef BOOL(*PfnCreateDescriptor)(
+	DescriptorHeap** ppDescriptorHeap,
+	D3D12_DESCRIPTOR_HEAP_TYPE typeDescriptor,
+	UINT numDescriptor,
+	D3D12_DESCRIPTOR_HEAP_FLAGS flagDescriptor
+);
+SUNSET_GRAPHICS_CLASS BOOL CreateDescriptorHeap(
+	DescriptorHeap** ppDescriptorHeap,
+	D3D12_DESCRIPTOR_HEAP_TYPE typeDescriptor, 
+	UINT numDescriptor = 1,
+	D3D12_DESCRIPTOR_HEAP_FLAGS flagDescriptor = D3D12_DESCRIPTOR_HEAP_FLAG_NONE
+);
 
 #endif // !_DESCRIPTOR_HEAP_H_

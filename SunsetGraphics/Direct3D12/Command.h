@@ -11,49 +11,32 @@ struct ID3D12Fence;
 
 class FrameBuffer;
 
-namespace DX12
+struct FrameContext 
 {
-	struct FrameContext 
-	{
-		ComPtr<ID3D12CommandAllocator> cmdAlloc;
-		UINT m_fenceValue = 0;
-	};
+	ComPtr<ID3D12CommandAllocator> cmdAlloc;
+	UINT m_fenceValue = 0;
+};
 
-	class  Command
-	{
-	public:
-		SUNSET_GRAPHICS_CLASS Command();
-		SUNSET_GRAPHICS_CLASS ~Command();
+class SUNSET_GRAPHICS_CLASS Command
+{
+public:
+	Command() {}
+	virtual ~Command() {}
 
-		SUNSET_GRAPHICS_CLASS void Create();
-
-		SUNSET_GRAPHICS_CLASS void Begin(FrameBuffer* pFrameBuffer);
-
-		SUNSET_GRAPHICS_CLASS void Close();
-
-		SUNSET_GRAPHICS_CLASS void Wait(FrameBuffer* pFrameBuffer);
-
-		SUNSET_GRAPHICS_CLASS void WaitForLastSubmittedFrame(FrameBuffer* pFrameBuffer);
-		SUNSET_GRAPHICS_CLASS FrameContext* WaitForNextFrameResources(FrameBuffer* pFrameBuffer);
-
-		SUNSET_GRAPHICS_CLASS ID3D12CommandQueue* GetCommandQueue();
-		SUNSET_GRAPHICS_CLASS ID3D12GraphicsCommandList* GetCommandList();
-
-	private:
-
-		ComPtr<ID3D12CommandAllocator> cmdAlloc;
+	virtual void Begin(FrameBuffer* pFrameBuffer) = 0;
 		
-		ComPtr<ID3D12CommandQueue> cmdQueue;
-		ComPtr<ID3D12GraphicsCommandList> cmdList;
-		
-		ComPtr<ID3D12Fence> fence;
-		UINT m_fenceValue = 0;
+	virtual void Close() = 0;
 
-		FrameContext m_frameContext[2];
-		UINT m_frameIndex;
+	virtual void Wait(FrameBuffer* pFrameBuffer) = 0;
 
-		FrameContext* currentFrameCtx;
-	};
-}
+	virtual void WaitForLastSubmittedFrame(FrameBuffer* pFrameBuffer) = 0;
+	virtual FrameContext* WaitForNextFrameResources(FrameBuffer* pFrameBuffer) = 0;
+
+	virtual ID3D12CommandQueue* GetCommandQueue() = 0;
+	virtual ID3D12GraphicsCommandList* GetCommandList() = 0;
+};
+
+typedef BOOL(*PfnCreateCommand)(Command** ppCommand);
+SUNSET_GRAPHICS_API BOOL CreateCommand(Command** ppCommand);
 
 #endif // !_COMMAND_H_

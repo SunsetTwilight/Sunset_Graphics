@@ -8,18 +8,21 @@
 
 #include "DescriptorHeap.h"
 
-namespace DX12
+class SUNSET_GRAPHICS_CLASS ShaderResourceView : 
+    public DescriptorHeap
 {
-    class ShaderResourceView :
-        public DescriptorHeap
-    {
-    public:
-        SUNSET_GRAPHICS_CLASS ShaderResourceView();
-        SUNSET_GRAPHICS_CLASS virtual ~ShaderResourceView();
+public:
+    ShaderResourceView() {}
+    virtual ~ShaderResourceView() {}
+};
 
-        SUNSET_GRAPHICS_CLASS ShaderResourceView(UINT num);
-
-    };
-}
+typedef BOOL(*PfnCreateShaderResourceView)(
+    ShaderResourceView** ppShaderResourceView,
+    UINT num
+);
+SUNSET_GRAPHICS_API BOOL CreateShaderResourceView(
+    ShaderResourceView** ppShaderResourceView, 
+    UINT num
+);
 
 #endif // !_SHADER_RESOURCE_VIEW_H_

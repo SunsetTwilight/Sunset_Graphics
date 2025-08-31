@@ -12,27 +12,29 @@
 struct ID3D12DescriptorHeap;
 struct ID3D12Resource;
 
-namespace DX12
+class SUNSET_GRAPHICS_CLASS DepthStencilView :
+	public DescriptorHeap
 {
-	class DepthStencilView :
-		public DescriptorHeap
-	{
-	public:
-		DepthStencilView();
-		~DepthStencilView();
+public:
+	DepthStencilView() {}
+	virtual ~DepthStencilView() {}
 
-		void CleanUp();
+	virtual void CleanUp() = 0;
 
-		static BOOL CreateForSwapChain(
-			std::shared_ptr<DepthStencilView>& pDSV,
-			DXGI::DXGI_SwapChain* pSwapChain
-		);
+protected:
+	//ComPtr<ID3D12Resource> m_dsv;
 
-	protected:
-		ComPtr<ID3D12Resource> m_dsv;
+	friend class RenderTargets;
+};
 
-		friend class RenderTargets;
-	};
-}
+SUNSET_GRAPHICS_CLASS BOOL CreateDepthStencilView(
+	DepthStencilView** ppDepthStencilView,
+	DXGI::DXGI_SwapChain* pSwapChain
+);
+
+/*SUNSET_GRAPHICS_CLASS BOOL CreateDepthStencilView(
+	DepthStencilView** ppDepthStencilView,
+	DXGI::DXGI_SwapChain* pSwapChain
+);*/
 
 #endif // !_DEPTH_STENCIL_VIEW_H_

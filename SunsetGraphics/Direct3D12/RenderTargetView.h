@@ -14,32 +14,22 @@
 struct ID3D12DescriptorHeap;
 struct ID3D12Resource;
 
-namespace DX12
+class SUNSET_GRAPHICS_CLASS RenderTargetView :
+	public DescriptorHeap
 {
-	class RenderTargetView : 
-		public DescriptorHeap
-	{
-	public:
-		RenderTargetView();
-		~RenderTargetView();
+public:
+	RenderTargetView() {}
+	virtual ~RenderTargetView() {}
 
-		void CleanUp();
+	virtual void CleanUp() = 0;
+	virtual ID3D12Resource* GetResource(UINT index) = 0;
 
-		ID3D12Resource* GetResource(UINT index);
+	friend class RenderTargets;
+};
 
-		static BOOL CreateForSwapChain(
-			std::shared_ptr<RenderTargetView>& pRenderTarget,
-			DXGI::DXGI_SwapChain* pSwapChain
-		);
-
-	protected:
-		std::vector<ComPtr<ID3D12Resource>> m_rtvs;
-
-	private:
-		UINT bufferCount;
-
-		friend class RenderTargets;
-	};
-}
+SUNSET_GRAPHICS_CLASS BOOL CreateRenderTargetView(
+	RenderTargetView** ppRenderTargetView,
+	DXGI::DXGI_SwapChain* pSwapChain
+);
 
 #endif // !_RENDER_TARGET_H_

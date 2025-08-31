@@ -14,15 +14,50 @@ namespace DX12
 {
 	extern ComPtr<ID3D12Device>	g_d3d12_device;
 
-	Command::Command()
+	class Impl_Command :
+		public Command
+	{
+	public:
+		Impl_Command();
+		~Impl_Command();
+
+		BOOL Create();
+
+		void Begin(FrameBuffer* pFrameBuffer) override;
+		void Close() override;
+
+		void Wait(FrameBuffer* pFrameBuffer) override;
+
+		void WaitForLastSubmittedFrame(FrameBuffer* pFrameBuffer) override;
+		FrameContext* WaitForNextFrameResources(FrameBuffer* pFrameBuffer) override;
+
+		ID3D12CommandQueue* GetCommandQueue() override;
+		ID3D12GraphicsCommandList* GetCommandList() override;
+
+		ComPtr<ID3D12CommandAllocator> cmdAlloc;
+
+		ComPtr<ID3D12CommandQueue> cmdQueue;
+		ComPtr<ID3D12GraphicsCommandList> cmdList;
+
+		ComPtr<ID3D12Fence> fence;
+		UINT m_fenceValue = 0;
+
+		FrameContext m_frameContext[2];
+		UINT m_frameIndex;
+
+		FrameContext* currentFrameCtx;
+
+	};
+
+	Impl_Command::Impl_Command()
 	{
 	}
 
-	Command::~Command()
+	Impl_Command::~Impl_Command()
 	{
 	}
 
-	void Command::Create()
+	BOOL Impl_Command::Create()
 	{
 		HRESULT hr = S_OK;;
 
@@ -69,25 +104,27 @@ namespace DX12
 		}
 
 		hr = g_d3d12_device->CreateFence(m_fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+		
+		return TRUE;
 	}
 
-	void Command::Begin(FrameBuffer* pFrameBuffer)
+	void Impl_Command::Begin(FrameBuffer* pFrameBuffer)
 	{
 		currentFrameCtx = WaitForNextFrameResources(pFrameBuffer);
 		ID3D12CommandAllocator* alloc = currentFrameCtx->cmdAlloc.Get();
 
-		alloc->Reset();
+		HRESULT hr = alloc->Reset();
 		cmdList->Reset(alloc, nullptr);
 	}
 
-	void Command::Close()
+	void Impl_Command::Close()
 	{
 		cmdList->Close();
 	}
 
 	UINT64 g_fenceLastSignaledValue = 0;
 
-	void Command::Wait(FrameBuffer* pFrameBuffer)
+	void Impl_Command::Wait(FrameBuffer* pFrameBuffer)
 	{
 		//•`‰æI—¹‘Ò‚¿
 		g_fenceLastSignaledValue++;
@@ -116,7 +153,7 @@ namespace DX12
 		return;
 	}
 
-	void Command::WaitForLastSubmittedFrame(FrameBuffer* pFrameBuffer)
+	void Impl_Command::WaitForLastSubmittedFrame(FrameBuffer* pFrameBuffer)
 	{
 		FrameContext* frameCtx = &m_frameContext[m_frameIndex % 2];
 
@@ -139,7 +176,7 @@ namespace DX12
 		CloseHandle(event);
 	}
 
-	FrameContext* Command::WaitForNextFrameResources(FrameBuffer* pFrameBuffer)
+	FrameContext* Impl_Command::WaitForNextFrameResources(FrameBuffer* pFrameBuffer)
 	{
 		UINT nextFrameIndex = m_frameIndex + 1;
 		m_frameIndex = nextFrameIndex;
@@ -167,13 +204,32 @@ namespace DX12
 		return frameCtx;
 	}
 
-	ID3D12CommandQueue* Command::GetCommandQueue()
+	ID3D12CommandQueue* Impl_Command::GetCommandQueue()
 	{
 		return cmdQueue.Get();
 	}
 
-	ID3D12GraphicsCommandList* Command::GetCommandList()
+	ID3D12GraphicsCommandList* Impl_Command::GetCommandList()
 	{
 		return cmdList.Get();
 	}
+}
+
+BOOL CreateCommand(Command** ppCommand)
+{
+	DX12::Impl_Command* pImplCommand = new DX12::Impl_Command;
+
+	if (pImplCommand->Create()) {
+
+		(*ppCommand) = pImplCommand;
+		return TRUE;
+	}
+	else {
+
+		delete pImplCommand;
+		ppCommand = nullptr;
+		return FALSE;
+	}
+
+	return FALSE;
 }

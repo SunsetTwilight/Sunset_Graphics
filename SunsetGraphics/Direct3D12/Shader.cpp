@@ -5,6 +5,7 @@
 #include <dxgi1_6.h>
 
 #include <d3d12shader.h>
+#include <d3dcompiler.h>
 
 #pragma comment(lib, "D3DCompiler.lib")
 
@@ -13,18 +14,48 @@
 #include <memory>
 #include <stdexcept>
 
-#include <d3dcompiler.h>
-
 #include <atlstr.h>
 
 namespace DX12
 {
 	extern ComPtr<ID3D12Device> g_d3d12_device;
 
-	Shader::Shader() : type(ShaderType::None) {}
-	Shader::~Shader() {}
+	class Impl_Shader :
+		public Shader
+	{
+	public:
+		Impl_Shader();
+		~Impl_Shader();
 
-	BOOL Shader::ShaderCompile(
+		static BOOL ShaderCompile(
+			ID3DBlob** ppCode,
+			LPCWSTR pFileName,
+			LPCSTR pEntryPoint,
+			LPCSTR pTarget
+		);
+
+		ShaderType GetType() override;
+
+		LPVOID GetBufferPointer() override;
+		SIZE_T GetBufferSize() override;
+
+		BOOL CreateVertexShaderEx(LPCWSTR pFileName);
+		BOOL CreatePixelShaderEx(LPCWSTR pFileName);
+		BOOL CreateGeometryShaderEx(LPCWSTR pFileName);
+		BOOL CreateHullShaderEx(LPCWSTR pFileName);
+		BOOL CreateDomainShaderEx(LPCWSTR pFileName);
+
+	protected:
+		ComPtr<ID3DBlob> code;
+
+	private:
+		ShaderType type;
+	};
+
+	Impl_Shader::Impl_Shader() : type(ShaderType::None) {}
+	Impl_Shader::~Impl_Shader() {}
+
+	BOOL Impl_Shader::ShaderCompile(
 		ID3DBlob** ppCode, 
 		LPCWSTR pFileName, 
 		LPCSTR pEntryPoint, 
@@ -72,17 +103,22 @@ namespace DX12
 		return TRUE;
 	}
 
-	ID3DBlob* Shader::GetBlob()
-	{
-		return code.Get();
-	}
-
-	ShaderType Shader::GetType()
+	ShaderType Impl_Shader::GetType()
 	{
 		return type;
 	}
 
-	BOOL Shader::CreateVertexShaderEx(LPCWSTR pFileName)
+	LPVOID Impl_Shader::GetBufferPointer()
+	{
+		return code->GetBufferPointer();
+	}
+
+	SIZE_T Impl_Shader::GetBufferSize()
+	{
+		return code->GetBufferSize();
+	}
+
+	BOOL Impl_Shader::CreateVertexShaderEx(LPCWSTR pFileName)
 	{
 		if (!ShaderCompile(code.GetAddressOf(), pFileName, "VSMain", "vs_5_1"))
 			return FALSE;
@@ -92,7 +128,7 @@ namespace DX12
 		return TRUE;
 	}
 
-	BOOL Shader::CreatePixelShaderEx(LPCWSTR pFileName)
+	BOOL Impl_Shader::CreatePixelShaderEx(LPCWSTR pFileName)
 	{
 		if (!ShaderCompile(code.GetAddressOf(), pFileName, "PSMain", "ps_5_1"))
 			return FALSE;
@@ -102,7 +138,7 @@ namespace DX12
 		return TRUE;
 	}
 
-	BOOL Shader::CreateGeometryShaderEx(LPCWSTR pFileName)
+	BOOL Impl_Shader::CreateGeometryShaderEx(LPCWSTR pFileName)
 	{
 		if (!ShaderCompile(code.GetAddressOf(), pFileName, "GSMain", "gs_5_1"))
 			return FALSE;
@@ -112,7 +148,7 @@ namespace DX12
 		return TRUE;
 	}
 
-	BOOL Shader::CreateHullShaderEx(LPCWSTR pFileName)
+	BOOL Impl_Shader::CreateHullShaderEx(LPCWSTR pFileName)
 	{
 		if (!ShaderCompile(code.GetAddressOf(), pFileName, "HSMain", "hs_5_1"))
 			return FALSE;
@@ -122,7 +158,7 @@ namespace DX12
 		return TRUE;
 	}
 
-	BOOL Shader::CreateDomainShaderEx(LPCWSTR pFileName)
+	BOOL Impl_Shader::CreateDomainShaderEx(LPCWSTR pFileName)
 	{
 		if (!ShaderCompile(code.GetAddressOf(), pFileName, "DSMain", "ds_5_1"))
 			return FALSE;
@@ -131,6 +167,118 @@ namespace DX12
 		
 		return TRUE;
 	}
+}
 
+BOOL CreateVertexShader(
+	Shader** pShader, 
+	LPCWSTR pFileName
+)
+{
+	DX12::Impl_Shader* pImplShader = new DX12::Impl_Shader;
+	if (pImplShader->CreateVertexShaderEx(pFileName)) {
 
+		(*pShader) = static_cast<Shader*>(pImplShader);
+		return TRUE;
+	}
+	else {
+		(*pShader) = NULL;
+		return FALSE;
+	}
+
+	return FALSE;
+}
+
+BOOL CreatePixelShader(
+	Shader** pShader, 
+	LPCWSTR pFileName
+)
+{
+	DX12::Impl_Shader* pImplShader = new DX12::Impl_Shader;
+	if (pImplShader->CreatePixelShaderEx(pFileName)) {
+
+		(*pShader) = static_cast<Shader*>(pImplShader);
+		return TRUE;
+	}
+	else {
+		(*pShader) = NULL;
+		return FALSE;
+	}
+
+	return FALSE;
+}
+
+BOOL CreateGeometryShader(
+	Shader** pShader, 
+	LPCWSTR pFileName
+)
+{
+	DX12::Impl_Shader* pImplShader = new DX12::Impl_Shader;
+	if (pImplShader->CreateGeometryShaderEx(pFileName)) {
+
+		(*pShader) = static_cast<Shader*>(pImplShader);
+		return TRUE;
+	}
+	else {
+		(*pShader) = NULL;
+		return FALSE;
+	}
+
+	return FALSE;
+}
+
+BOOL CreateHullShader(
+	Shader** pShader, 
+	LPCWSTR pFileName
+)
+{
+	DX12::Impl_Shader* pImplShader = new DX12::Impl_Shader;
+	if (pImplShader->CreateHullShaderEx(pFileName)) {
+
+		(*pShader) = static_cast<Shader*>(pImplShader);
+		return TRUE;
+	}
+	else {
+		(*pShader) = NULL;
+		return FALSE;
+	}
+
+	return FALSE;
+}
+
+BOOL CreateDomainShader(
+	Shader** pShader, 
+	LPCWSTR pFileName
+)
+{
+	DX12::Impl_Shader* pImplShader = new DX12::Impl_Shader;
+	if (pImplShader->CreateDomainShaderEx(pFileName)) {
+
+		(*pShader) = static_cast<Shader*>(pImplShader);
+		return TRUE;
+	}
+	else {
+		(*pShader) = NULL;
+		return FALSE;
+	}
+
+	return FALSE;
+}
+
+BOOL CreateComputeShader(
+	Shader** pShader, 
+	LPCWSTR pFileName
+)
+{
+	/*Impl_Shader* pImplShader = new Impl_Shader;
+	if (pImplShader->CreateComputeShaderEx(pFileName)) {
+
+		pShader = static_cast<Shader*>(pImplShader);
+		return TRUE;
+	}
+	else {
+		pShader = NULL;
+		return FALSE;
+	}*/
+
+	return FALSE;
 }

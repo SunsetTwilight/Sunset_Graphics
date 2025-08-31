@@ -2,6 +2,8 @@
 
 #include <d3d12.h>
 #include <d3dcompiler.h>
+#include <d3dcommon.h>
+
 #include <dxgi1_6.h>
 
 #include <vector>
@@ -16,7 +18,27 @@ namespace DX12
 	extern ComPtr<ID3D12Device>	g_d3d12_device;
 	extern PFN_D3D12_SERIALIZE_ROOT_SIGNATURE D3D12SerializeRootSignature;
 
-	RootSignature::RootSignature()
+	class Impl_RootSignature :
+		public RootSignature
+	{
+	public:
+		Impl_RootSignature();
+		~Impl_RootSignature();
+
+		BOOL FetchRootSignatureFromShader(Shader* pShader);
+
+		void Active(ID3D12GraphicsCommandList* pCmdList) override;
+
+		void* GetRootSignature() override;
+
+	private:
+		ComPtr<ID3D12RootSignature> pRootSignature;
+		ComPtr<ID3DBlob> pRootSignatureBlob;
+
+		friend class GraphicsPipelineState;
+	};
+
+	Impl_RootSignature::Impl_RootSignature()
 	{
 		/*D3D12_ROOT_SIGNATURE_DESC desc;
 		desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -38,18 +60,16 @@ namespace DX12
 		);*/
 	}
 
-	RootSignature::~RootSignature()
+	Impl_RootSignature::~Impl_RootSignature()
 	{
 
 	}
 
-	BOOL RootSignature::FetchRootSignatureFromShader(Shader* pShader)
+	BOOL Impl_RootSignature::FetchRootSignatureFromShader(Shader* pShader)
 	{
-		ID3DBlob* shader = pShader->GetBlob();
-		
 		HRESULT hr = D3DGetBlobPart(
-			shader->GetBufferPointer(),
-			shader->GetBufferSize(),
+			pShader->GetBufferPointer(),
+			pShader->GetBufferSize(),
 			D3D_BLOB_ROOT_SIGNATURE,
 			0,
 			pRootSignatureBlob.GetAddressOf()
@@ -64,8 +84,8 @@ namespace DX12
 		/* ¬Œ÷ */
 		hr = g_d3d12_device->CreateRootSignature(
 			0,
-			pRootSignatureBlob->GetBufferPointer(),
-			pRootSignatureBlob->GetBufferSize(),
+			pShader->GetBufferPointer(),
+			pShader->GetBufferSize(),
 			IID_PPV_ARGS(pRootSignature.GetAddressOf())
 		);
 		
@@ -77,8 +97,35 @@ namespace DX12
 
 		return TRUE;
 	}
-	SUNSET_GRAPHICS_CLASS void RootSignature::Active(ID3D12GraphicsCommandList* pCmdList)
+
+	void Impl_RootSignature::Active(ID3D12GraphicsCommandList* pCmdList)
 	{
 		pCmdList->SetGraphicsRootSignature(pRootSignature.Get());
 	}
+
+	void* Impl_RootSignature::GetRootSignature()
+	{
+		return pRootSignature.Get();
+	}
+}
+
+BOOL CreateRootSignatureByFetchFromShader(
+	RootSignature** ppRootSignature,
+	Shader* pShader
+)
+{
+	DX12::Impl_RootSignature* pImplRootSignature = new DX12::Impl_RootSignature;
+
+	if (pImplRootSignature->FetchRootSignatureFromShader(pShader)) {
+
+		(*ppRootSignature) = pImplRootSignature;
+		return TRUE;
+	}
+	else {
+
+		(*ppRootSignature) = nullptr;
+		return FALSE;
+	}
+
+	return FALSE;
 }

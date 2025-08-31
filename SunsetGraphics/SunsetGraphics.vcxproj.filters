@@ -57,9 +57,6 @@
     <ClCompile Include="Direct3D12\ShaderResourceView.cpp">
       <Filter>Direct3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Direct3D12\VertexBuffer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Direct3D12\GraphicsPipelineState.cpp">
       <Filter>Direct3D12</Filter>
     </ClCompile>
@@ -70,6 +67,12 @@
       <Filter>Direct3D12</Filter>
     </ClCompile>
     <ClCompile Include="Direct3D12\ShaderVariable.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\VertexBuffer.cpp">
+      <Filter>Direct3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D12\IndexBuffer.cpp">
       <Filter>Direct3D12</Filter>
     </ClCompile>
   </ItemGroup>
@@ -122,9 +125,6 @@
     <ClInclude Include="Vertex.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Direct3D12\VertexBuffer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Direct3D12\GraphicsPipelineState.h">
       <Filter>Direct3D12</Filter>
     </ClInclude>
@@ -135,6 +135,12 @@
       <Filter>Direct3D12</Filter>
     </ClInclude>
     <ClInclude Include="Direct3D12\ShaderVariable.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\VertexBuffer.h">
+      <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D12\IndexBuffer.h">
       <Filter>Direct3D12</Filter>
     </ClInclude>
   </ItemGroup>

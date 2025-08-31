@@ -4,31 +4,29 @@
 #include "../sunset_graphics_pch.h"
 #include "Direct3D_12_def.h"
 
-#include <d3dcommon.h>
-
-struct ID3D12RootSignature;
 struct ID3D12GraphicsCommandList;
+struct ID3D12RootSignature;
 
-namespace DX12
+class Shader;
+
+class SUNSET_GRAPHICS_CLASS RootSignature
 {
-	class Shader;
+public:
+	RootSignature() {}
+	virtual ~RootSignature() {}
 
-	class RootSignature
-	{
-	public:
-		SUNSET_GRAPHICS_CLASS RootSignature();
-		SUNSET_GRAPHICS_CLASS ~RootSignature();
+	virtual void Active(ID3D12GraphicsCommandList* pCmdList) = 0;
 
-		SUNSET_GRAPHICS_CLASS BOOL FetchRootSignatureFromShader(Shader* pShader);
+	virtual void* GetRootSignature() = 0;
+};
 
-		SUNSET_GRAPHICS_CLASS void Active(ID3D12GraphicsCommandList* pCmdList);
-
-	private:
-		ComPtr<ID3D12RootSignature> pRootSignature;
-		ComPtr<ID3DBlob> pRootSignatureBlob;
-
-		friend class GraphicsPipelineState;
-	};
-}
+typedef BOOL(*PfnCreateRootSignatureByFetchFromShader)(
+	RootSignature** pRootSignature,
+	Shader* pShader
+	);
+SUNSET_GRAPHICS_API BOOL CreateRootSignatureByFetchFromShader(
+	RootSignature** pRootSignature,
+	Shader* pShader
+);
 
 #endif // !_ROOT_SIGNATURE_H_

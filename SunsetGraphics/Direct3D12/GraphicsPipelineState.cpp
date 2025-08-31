@@ -1,5 +1,6 @@
 #include "GraphicsPipelineState.h"
 
+#include "Shader.h"
 #include "RootSignature.h"
 
 #include <d3d12.h>
@@ -14,7 +15,36 @@ namespace DX12
 {
 	extern ComPtr<ID3D12Device>	g_d3d12_device;
 
-	GraphicsPipelineState::GraphicsPipelineState()
+	class Impl_RootSignature;
+
+	class Impl_GraphicsPipelineState :
+		public GraphicsPipelineState
+	{
+	public:
+		Impl_GraphicsPipelineState();
+		~Impl_GraphicsPipelineState();
+
+		void CreateGraphicsPipeline();
+
+		void SetRootSignature(RootSignature* pRootSignature);
+
+		void SetVertexShader(Shader* pShader);
+		void SetPixelShader(Shader* pShader);
+
+		void SetInputElementDesc(
+			D3D12_INPUT_ELEMENT_DESC* pInputElementDesc,
+			UINT numElements
+		);
+
+		void Active(ID3D12GraphicsCommandList* pCmdList);
+
+	private:
+		ComPtr<ID3D12PipelineState> pPipelineState;
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC desc;
+
+	};
+
+	Impl_GraphicsPipelineState::Impl_GraphicsPipelineState()
 	{
 		desc.pRootSignature = nullptr;
 
@@ -39,7 +69,7 @@ namespace DX12
 		desc.DepthStencilState;
 
 		/* -------- 頂点データに依存 -------- */
-		desc.InputLayout.pInputElementDescs;	
+		desc.InputLayout.pInputElementDescs;
 		desc.InputLayout.NumElements;
 
 		desc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
@@ -57,37 +87,36 @@ namespace DX12
 		desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	}
 
-	GraphicsPipelineState::~GraphicsPipelineState()
+	Impl_GraphicsPipelineState::~Impl_GraphicsPipelineState()
 	{
-
 	}
 
-	void GraphicsPipelineState::CreateGraphicsPipeline()
+	void Impl_GraphicsPipelineState::CreateGraphicsPipeline()
 	{
 		g_d3d12_device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(pPipelineState.GetAddressOf()));
 	}
 
-	void GraphicsPipelineState::SetRootSignature(RootSignature* pRootSignature)
+	void Impl_GraphicsPipelineState::SetRootSignature(RootSignature* pRootSignature)
 	{
-		auto ptr = pRootSignature->pRootSignature.Get();
+		auto ptr = pRootSignature->GetRootSignature();
 		if (ptr != nullptr) {
-			desc.pRootSignature = ptr;
+			desc.pRootSignature = (ID3D12RootSignature*)(ptr);
 		}
 	}
 
-	void GraphicsPipelineState::SetVertexShader(ID3DBlob* pBlob)
+	void Impl_GraphicsPipelineState::SetVertexShader(Shader* pShader)
 	{
-		desc.VS.pShaderBytecode = pBlob->GetBufferPointer();
-		desc.VS.BytecodeLength = pBlob->GetBufferSize();
+		desc.VS.pShaderBytecode = pShader->GetBufferPointer();
+		desc.VS.BytecodeLength = pShader->GetBufferSize();
 	}
 
-	void GraphicsPipelineState::SetPixelShader(ID3DBlob* pBlob)
+	void Impl_GraphicsPipelineState::SetPixelShader(Shader* pShader)
 	{
-		desc.PS.pShaderBytecode = pBlob->GetBufferPointer();
-		desc.PS.BytecodeLength = pBlob->GetBufferSize();
+		desc.PS.pShaderBytecode = pShader->GetBufferPointer();
+		desc.PS.BytecodeLength = pShader->GetBufferSize();
 	}
 
-	void GraphicsPipelineState::SetInputElementDesc(
+	void Impl_GraphicsPipelineState::SetInputElementDesc(
 		D3D12_INPUT_ELEMENT_DESC* pInputElementDesc,
 		UINT numElements
 	)
@@ -96,8 +125,36 @@ namespace DX12
 		desc.InputLayout.NumElements = numElements;
 	}
 
-	void GraphicsPipelineState::Active(ID3D12GraphicsCommandList* pCmdList)
+	void Impl_GraphicsPipelineState::Active(ID3D12GraphicsCommandList* pCmdList)
 	{
 		pCmdList->SetPipelineState(pPipelineState.Get());
 	}
+}
+
+BOOL CreateGraphicsPipeline(
+	GraphicsPipelineState** ppGraphicsPipelineState, 
+	RootSignature* pRootSignature,
+	D3D12_INPUT_ELEMENT_DESC* pInputElementDesc,
+	UINT countofInputElement,
+	Shader* pVS, 
+	Shader* pPS
+)
+{
+	DX12::Impl_GraphicsPipelineState* impl = new DX12::Impl_GraphicsPipelineState;
+
+	impl->SetRootSignature(pRootSignature);
+		
+	impl->SetInputElementDesc(
+		pInputElementDesc,
+		countofInputElement
+	);
+		
+	impl->SetVertexShader(pVS);
+	impl->SetPixelShader(pPS);
+
+	impl->CreateGraphicsPipeline();
+
+	(*ppGraphicsPipelineState) = impl;
+
+	return TRUE;
 }

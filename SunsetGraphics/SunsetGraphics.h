@@ -10,7 +10,10 @@
 
 #include "FrameBuffer.h"
 
+typedef BOOL(*PfnSunset_Graphics_Init)(void);
 SUNSET_GRAPHICS_API BOOL Sunset_Graphics_Init();	//グラフィック系の初期化
+
+typedef BOOL(*PfnSunset_Graphics_CleanUp)(void);
 SUNSET_GRAPHICS_API BOOL Sunset_Graphics_CleanUp();	//グラフィック系の解放
 
 #endif // !_SUNSET_GRAPHICS

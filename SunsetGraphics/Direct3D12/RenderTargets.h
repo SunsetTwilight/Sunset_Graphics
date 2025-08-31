@@ -13,26 +13,23 @@
 
 struct ID3D12GraphicsCommandList;
 
-namespace DX12
+class RenderTargetView;
+class DepthStencilView;
+
+class RenderTargets
 {
-	class RenderTargetView;
-	class DepthStencilView;
+public:
+	RenderTargets();
+	~RenderTargets();
 
-	class RenderTargets
-	{
-	public:
-		RenderTargets();
-		~RenderTargets();
+	static void OMSet(
+		ID3D12GraphicsCommandList* pCommandList,
+		RenderTargetView* pRTV,
+		DepthStencilView* pDSV = nullptr
+	);
 
-		static void OMSet(
-			ID3D12GraphicsCommandList* pCommandList,
-			RenderTargetView* pRTV,
-			DepthStencilView* pDSV = nullptr
-		);
-
-	private:
+private:
 		
-	};
-}
+};
 
 #endif // !_RENDER_TARGETS_H_

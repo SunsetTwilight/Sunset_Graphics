@@ -1,5 +1,5 @@
-#ifndef _VERTEX_BUFFER_H_
-#define _VERTEX_BUFFER_H_
+#ifndef _DX12_VERTEX_BUFFER_H_
+#define _DX12_VERTEX_BUFFER_H_
 
 #include "../sunset_graphics_pch.h"
 #include "Direct3D_12_def.h"
@@ -10,36 +10,38 @@
 struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
 
-namespace DX12
+class IndexBuffer;
+
+class SUNSET_GRAPHICS_CLASS VertexBuffer
 {
-	class VertexBuffer
-	{
-	public:
-		SUNSET_GRAPHICS_CLASS VertexBuffer();
-		SUNSET_GRAPHICS_CLASS ~VertexBuffer();
+public:
+	VertexBuffer() {}
+	virtual ~VertexBuffer() {}
 
-		SUNSET_GRAPHICS_CLASS void CreateVertexBuffer(
-			UINT _typeSize, 
-			void* _pVertice,
-			UINT _vertexCount
-		);
+	virtual void Mapping(
+		void* _pVertice, 
+		UINT _vertexCount
+	) = 0;
 
-		SUNSET_GRAPHICS_CLASS void Mapping(
-			void* _pVertice, 
-			UINT _vertexCount
-		);
+	virtual void Draw(ID3D12GraphicsCommandList* _pCmdList) = 0;
+	virtual void DrawIndexed(
+		ID3D12GraphicsCommandList* pCmdList,
+		IndexBuffer* pIndexBuffer
+	) = 0;
+};
 
-		SUNSET_GRAPHICS_CLASS void Draw(ID3D12GraphicsCommandList* _pCmdList);
+typedef BOOL(*PfnCreateVertexBuffer)(
+	VertexBuffer** _vertexBuffer,
+	UINT _typeSize,
+	void* _pVertice,
+	UINT _vertexCount
+);
 
-	private:
-		ComPtr<ID3D12Resource> resource;
+SUNSET_GRAPHICS_API BOOL CreateVertexBuffer(
+	VertexBuffer** _ppVertexBuffer,
+	UINT _typeSize,
+	void* _pVertice,
+	UINT _vertexCount
+);
 
-		UINT typeSize;
-		UINT vertexCount;
-
-		D3D12_VERTEX_BUFFER_VIEW view;
-
-	};
-}
-
-#endif // !_VERTEX_BUFFER_H_
+#endif // !_DX12_VERTEX_BUFFER_H_

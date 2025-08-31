@@ -1,20 +1,45 @@
 #include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 namespace DX12
 {
 	extern ComPtr<ID3D12Device>	g_d3d12_device;
 
-	VertexBuffer::VertexBuffer()
+	class Impl_VertexBuffer :
+		public VertexBuffer
 	{
-	}
+	public:
+		Impl_VertexBuffer(
+			UINT _typeSize,
+			void* _pVertice,
+			UINT _vertexCount
+		);
+		~Impl_VertexBuffer();
 
-	VertexBuffer::~VertexBuffer() 
-	{
-	}
+		void Mapping(
+			void* _pVertice,
+			UINT _vertexCount
+		) override;
 
-	void VertexBuffer::CreateVertexBuffer(
-		UINT _typeSize, 
-		void* _pVertice, 
+		void Draw(ID3D12GraphicsCommandList* _pCmdList) override;
+		void DrawIndexed(
+			ID3D12GraphicsCommandList* pCmdList,
+			IndexBuffer* pIndexBuffer
+		) override;
+
+	private:
+		ComPtr<ID3D12Resource> resource;
+
+		UINT typeSize;
+		UINT vertexCount;
+
+		D3D12_VERTEX_BUFFER_VIEW view;
+
+	};
+
+	Impl_VertexBuffer::Impl_VertexBuffer(
+		UINT _typeSize,
+		void* _pVertice,
 		UINT _vertexCount
 	)
 	{
@@ -59,34 +84,68 @@ namespace DX12
 		view.StrideInBytes = typeSize;
 	}
 
-	void VertexBuffer::Mapping(
-		void* _pVertice, 
+	Impl_VertexBuffer::~Impl_VertexBuffer()
+	{
+	}
+
+	void Impl_VertexBuffer::Mapping(
+		void* _pVertice,
 		UINT _vertexCount
 	)
 	{
-		//送信範囲
-		D3D12_RANGE range = { 0,0 };
+		if (resource != nullptr) {
 
-		//マッピング
-		UINT8* data;
-		HRESULT hr = resource->Map(0, &range, reinterpret_cast<void**>(&data));
 
-		//頂点データのコピー
-		memcpy(data, _pVertice, typeSize * _vertexCount);
+			//送信範囲
+			D3D12_RANGE range = { 0,0 };
 
-		//アンマップ
-		resource->Unmap(0, nullptr);
+			//マッピング
+			UINT8* data;
+			HRESULT hr = resource->Map(0, &range, reinterpret_cast<void**>(&data));
+
+			//頂点データのコピー
+			memcpy(
+				data,
+				_pVertice,
+				typeSize * _vertexCount
+			);
+
+			//アンマップ
+			resource->Unmap(0, nullptr);
+		}
 	}
 
-	void VertexBuffer::Draw(ID3D12GraphicsCommandList* pCmdList)
+	void Impl_VertexBuffer::Draw(ID3D12GraphicsCommandList* pCmdList)
 	{
-		//頂点バッファビューのセット
-		pCmdList->IASetVertexBuffers(0, 1, &view);
-
-		//トポロジータイプのセット
 		pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		//描画
+		pCmdList->IASetVertexBuffers(0, 1, &view);
 		pCmdList->DrawInstanced(vertexCount, 1, 0, 0);
 	}
+
+	void Impl_VertexBuffer::DrawIndexed(
+		ID3D12GraphicsCommandList* pCmdList, 
+		IndexBuffer* pIndexBuffer
+	)
+	{
+		pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		pCmdList->IASetVertexBuffers(0, 1, &view);
+		pIndexBuffer->Set(pCmdList);
+		pCmdList->DrawIndexedInstanced(pIndexBuffer->GetIndexCount(), 1, 0, 0, 0);
+	}
+}
+
+BOOL CreateVertexBuffer(
+	VertexBuffer** _ppVertexBuffer, 
+	UINT _typeSize, 
+	void* _pVertice,
+	UINT _vertexCount
+)
+{
+	(*_ppVertexBuffer) = new DX12::Impl_VertexBuffer(
+		_typeSize,
+		_pVertice,
+		_vertexCount
+	);
+
+	return TRUE;
 }

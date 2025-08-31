@@ -168,6 +168,7 @@
     <ClCompile Include="Direct3D12\DescriptorHeap.cpp" />
     <ClCompile Include="Direct3D12\Direct3D_12.cpp" />
     <ClCompile Include="Direct3D12\GraphicsPipelineState.cpp" />
+    <ClCompile Include="Direct3D12\IndexBuffer.cpp" />
     <ClCompile Include="Direct3D12\RenderTargets.cpp" />
     <ClCompile Include="Direct3D12\RenderTargetView.cpp" />
     <ClCompile Include="Direct3D12\RootSignature.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="Direct3D12\Direct3D_12.h" />
     <ClInclude Include="Direct3D12\Direct3D_12_def.h" />
     <ClInclude Include="Direct3D12\GraphicsPipelineState.h" />
+    <ClInclude Include="Direct3D12\IndexBuffer.h" />
     <ClInclude Include="Direct3D12\RenderTargets.h" />
     <ClInclude Include="Direct3D12\RenderTargetView.h" />
     <ClInclude Include="Direct3D12\RootSignature.h" />

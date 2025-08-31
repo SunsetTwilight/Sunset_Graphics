@@ -10,35 +10,43 @@
 struct ID3D12PipelineState;
 struct D3D12_GRAPHICS_PIPELINE_STATE_DESC;
 
-namespace DX12
+class Shader;
+class RootSignature;
+
+class GraphicsPipelineState
 {
-	class RootSignature;
+public:
+	GraphicsPipelineState() {}
+	virtual ~GraphicsPipelineState() {}
 
-	class GraphicsPipelineState
-	{
-	public:
-		SUNSET_GRAPHICS_CLASS GraphicsPipelineState();
-		SUNSET_GRAPHICS_CLASS ~GraphicsPipelineState();
+	virtual void SetRootSignature(RootSignature* pRootSignature) = 0;
 
-		SUNSET_GRAPHICS_CLASS void CreateGraphicsPipeline();
+	virtual void SetVertexShader(Shader* pShader) = 0;
+	virtual void SetPixelShader(Shader* pShader) = 0;
 
-		SUNSET_GRAPHICS_CLASS void SetRootSignature(RootSignature* pRootSignature);
+	virtual void SetInputElementDesc(
+		D3D12_INPUT_ELEMENT_DESC* pInputElementDesc,
+		UINT numElements
+	) = 0;
 
-		SUNSET_GRAPHICS_CLASS void SetVertexShader(ID3DBlob* pBlob);
-		SUNSET_GRAPHICS_CLASS void SetPixelShader(ID3DBlob* pBlob);
+	virtual void Active(ID3D12GraphicsCommandList* pCmdList) = 0;
+};
 
-		SUNSET_GRAPHICS_CLASS void SetInputElementDesc(
-			D3D12_INPUT_ELEMENT_DESC* pInputElementDesc,
-			UINT numElements
-		);
-
-		SUNSET_GRAPHICS_CLASS void Active(ID3D12GraphicsCommandList* pCmdList);
-
-	private:
-		ComPtr<ID3D12PipelineState> pPipelineState;
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC desc;
-
-	};
-}
+typedef BOOL(*PfnCreateGraphicsPipeline)(
+	GraphicsPipelineState** ppGraphicsPipelineState,
+	RootSignature* pRootSignature,
+	D3D12_INPUT_ELEMENT_DESC* pInputElementDesc,
+	UINT countofInputElement,
+	Shader* pVS,
+	Shader* pPS
+);
+SUNSET_GRAPHICS_API BOOL CreateGraphicsPipeline(
+	GraphicsPipelineState** ppGraphicsPipelineState,
+	RootSignature* pRootSignature,
+	D3D12_INPUT_ELEMENT_DESC* pInputElementDesc,
+	UINT countofInputElement,
+	Shader* pVS,
+	Shader* pPS
+);
 
 #endif // !_GRAPHICS_PIPELINE_STATE_H_
