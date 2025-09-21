@@ -21,14 +21,15 @@ namespace DX12
 		Impl_Command();
 		~Impl_Command();
 
-		BOOL Create();
+		BOOL Create(D3D12_COMMAND_LIST_TYPE _type);
 
+		void Begin() override;
 		void Begin(FrameBuffer* pFrameBuffer) override;
 		void Close() override;
 
 		void Wait(FrameBuffer* pFrameBuffer) override;
 
-		void WaitForLastSubmittedFrame(FrameBuffer* pFrameBuffer) override;
+		void WaitForLastSubmittedFrame() override;
 		FrameContext* WaitForNextFrameResources(FrameBuffer* pFrameBuffer) override;
 
 		ID3D12CommandQueue* GetCommandQueue() override;
@@ -57,16 +58,14 @@ namespace DX12
 	{
 	}
 
-	BOOL Impl_Command::Create()
+	BOOL Impl_Command::Create(D3D12_COMMAND_LIST_TYPE _type)
 	{
 		HRESULT hr = S_OK;;
-
-		D3D12_COMMAND_LIST_TYPE type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
 		{
 			D3D12_COMMAND_QUEUE_DESC desc;
 
-			desc.Type = type;
+			desc.Type = _type;
 			desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 			desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 			desc.NodeMask = 1;
@@ -79,7 +78,7 @@ namespace DX12
 
 		{
 			hr = g_d3d12_device->CreateCommandAllocator(
-				type,
+				_type,
 				IID_PPV_ARGS(cmdAlloc.GetAddressOf())
 			);
 
@@ -93,7 +92,7 @@ namespace DX12
 		{
 			hr = g_d3d12_device->CreateCommandList(
 				0,
-				type,
+				_type,
 				m_frameContext[0].cmdAlloc.Get(),
 				nullptr,
 				IID_PPV_ARGS(cmdList.GetAddressOf())
@@ -108,13 +107,21 @@ namespace DX12
 		return TRUE;
 	}
 
+	void Impl_Command::Begin()
+	{
+		ID3D12CommandAllocator* alloc = currentFrameCtx->cmdAlloc.Get();
+
+		HRESULT hr = alloc->Reset();
+		hr = cmdList->Reset(alloc, nullptr);
+	}
+
 	void Impl_Command::Begin(FrameBuffer* pFrameBuffer)
 	{
 		currentFrameCtx = WaitForNextFrameResources(pFrameBuffer);
 		ID3D12CommandAllocator* alloc = currentFrameCtx->cmdAlloc.Get();
 
 		HRESULT hr = alloc->Reset();
-		cmdList->Reset(alloc, nullptr);
+		hr = cmdList->Reset(alloc, nullptr);
 	}
 
 	void Impl_Command::Close()
@@ -153,7 +160,7 @@ namespace DX12
 		return;
 	}
 
-	void Impl_Command::WaitForLastSubmittedFrame(FrameBuffer* pFrameBuffer)
+	void Impl_Command::WaitForLastSubmittedFrame()
 	{
 		FrameContext* frameCtx = &m_frameContext[m_frameIndex % 2];
 
@@ -219,7 +226,7 @@ BOOL CreateCommand(Command** ppCommand)
 {
 	DX12::Impl_Command* pImplCommand = new DX12::Impl_Command;
 
-	if (pImplCommand->Create()) {
+	if (pImplCommand->Create(D3D12_COMMAND_LIST_TYPE_DIRECT)) {
 
 		(*ppCommand) = pImplCommand;
 		return TRUE;
@@ -233,3 +240,23 @@ BOOL CreateCommand(Command** ppCommand)
 
 	return FALSE;
 }
+
+BOOL CreateCommand_TypeCopy(Command** ppCommand)
+{
+	DX12::Impl_Command* pImplCommand = new DX12::Impl_Command;
+
+	if (pImplCommand->Create(D3D12_COMMAND_LIST_TYPE_COPY)) {
+
+		(*ppCommand) = pImplCommand;
+		return TRUE;
+	}
+	else {
+
+		delete pImplCommand;
+		ppCommand = nullptr;
+		return FALSE;
+	}
+
+	return FALSE;
+}
+

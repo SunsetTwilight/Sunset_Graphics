@@ -1,5 +1,6 @@
 #include "Direct3D_12.h"
 
+#include "Command.h"
 #include "../DXGI/DirectX_GI.h"
 
 #include "d3dx12.h"
@@ -40,6 +41,8 @@ namespace DX12
 	ComPtr<ID3D12Debug>			m_d3d12_debug{};
 	ComPtr<ID3D12Device>		g_d3d12_device{};	//Direct3D12のデバイスの実体
 	ComPtr<ID3D12CommandQueue>	cmd_queue{};
+
+	Command* m_pCopyCommand = nullptr;		/* リソースコピー用コマンド */
 
 //------------------------------------------------------------------------------------------------
 //関数定義
@@ -112,6 +115,8 @@ namespace DX12
 		if (!(CreateDevice(D3D_FEATURE_LEVEL_11_0))) {
 			retInit = FALSE;
 		}
+
+		CreateCommand_TypeCopy(&m_pCopyCommand);
 
 		return retInit;
 	}

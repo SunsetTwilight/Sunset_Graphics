@@ -198,6 +198,7 @@
     <ClInclude Include="Direct3D12\ShaderResourceView.h" />
     <ClInclude Include="Direct3D12\ShaderVariable.h" />
     <ClInclude Include="Direct3D12\VertexBuffer.h" />
+    <ClInclude Include="DirectXTex\DirectXTex\DirectXTex.h" />
     <ClInclude Include="DXGI\DirectX_GI.h" />
     <ClInclude Include="DXGI\DirectX_GI_def.h" />
     <ClInclude Include="DXGI\SwapChain.h" />

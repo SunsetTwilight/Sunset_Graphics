@@ -25,4 +25,13 @@ SUNSET_GRAPHICS_API BOOL CreateShaderResourceView(
     UINT num
 );
 
+typedef BOOL(*PfnLoadShaderResourceView)(
+    ShaderResourceView** ppShaderResourceView,
+    const wchar_t* szFile
+    );
+SUNSET_GRAPHICS_API BOOL LoadShaderResourceView(
+    ShaderResourceView** ppShaderResourceView,
+    const wchar_t* szFile
+);
+
 #endif // !_SHADER_RESOURCE_VIEW_H_

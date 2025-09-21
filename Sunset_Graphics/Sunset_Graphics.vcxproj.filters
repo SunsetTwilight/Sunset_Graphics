@@ -19,6 +19,9 @@
     <Filter Include="DXGI">
       <UniqueIdentifier>{40474391-7dfb-419a-8e81-a50b7e7d91ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DirectXTex">
+      <UniqueIdentifier>{81ebb77c-1114-40cc-8521-463915f8ac34}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -142,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="Direct3D12\IndexBuffer.h">
       <Filter>Direct3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXTex\DirectXTex\DirectXTex.h">
+      <Filter>DirectXTex</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

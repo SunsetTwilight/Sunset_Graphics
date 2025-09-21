@@ -23,13 +23,14 @@ public:
 	Command() {}
 	virtual ~Command() {}
 
+	virtual void Begin() = 0;
 	virtual void Begin(FrameBuffer* pFrameBuffer) = 0;
 		
 	virtual void Close() = 0;
 
 	virtual void Wait(FrameBuffer* pFrameBuffer) = 0;
 
-	virtual void WaitForLastSubmittedFrame(FrameBuffer* pFrameBuffer) = 0;
+	virtual void WaitForLastSubmittedFrame() = 0;
 	virtual FrameContext* WaitForNextFrameResources(FrameBuffer* pFrameBuffer) = 0;
 
 	virtual ID3D12CommandQueue* GetCommandQueue() = 0;
@@ -38,5 +39,7 @@ public:
 
 typedef BOOL(*PfnCreateCommand)(Command** ppCommand);
 SUNSET_GRAPHICS_API BOOL CreateCommand(Command** ppCommand);
+
+SUNSET_GRAPHICS_API BOOL CreateCommand_TypeCopy(Command** ppCommand);
 
 #endif // !_COMMAND_H_
