@@ -1,0 +1,3 @@
+[submodule "Sunset_Graphics/DirectXTex"]
+	path = Sunset_Graphics/DirectXTex
+	url = https://github.com/microsoft/DirectXTex.git
