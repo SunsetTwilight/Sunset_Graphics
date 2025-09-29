@@ -128,6 +128,10 @@ BOOL CreateRenderTargetView(
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = pImpl->GetCPUDescriptorHandle();
 	UINT rtvDescriptorSize = pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
 	std::vector<ComPtr<ID3D12Resource>> rtvs;
 	rtvs.resize(sd.BufferCount);
 	for (size_t i = 0; i < sd.BufferCount; i++) {
@@ -139,7 +143,7 @@ BOOL CreateRenderTargetView(
 
 		pDevice->CreateRenderTargetView(
 			rtvs[i].Get(),
-			nullptr,
+			&rtvDesc,
 			handle
 		);
 

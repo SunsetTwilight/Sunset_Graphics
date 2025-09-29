@@ -116,7 +116,7 @@ namespace DX12
 			retInit = FALSE;
 		}
 
-		CreateCommand_TypeCopy(&m_pCopyCommand);
+		CreateCommand(&m_pCopyCommand);
 
 		return retInit;
 	}
@@ -129,6 +129,8 @@ namespace DX12
 	BOOL Direct3D_12_CleanUp()
 	{
 		BOOL retCleanUp = TRUE;	//正常（初期値）
+
+		delete(m_pCopyCommand);
 
 		if (m_d3d12_debug.Reset() != 0) {
 			//Error(参照カウントが１以上なので、どこかで使用されたまま)

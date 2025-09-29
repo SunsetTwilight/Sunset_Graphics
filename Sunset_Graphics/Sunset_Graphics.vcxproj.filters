@@ -150,4 +150,9 @@
       <Filter>DirectXTex</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="EventBeforeBuild.bat">
+      <Filter>リソース ファイル</Filter>
+    </None>
+  </ItemGroup>
 </Project>

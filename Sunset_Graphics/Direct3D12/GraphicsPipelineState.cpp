@@ -93,7 +93,7 @@ namespace DX12
 
 	void Impl_GraphicsPipelineState::CreateGraphicsPipeline()
 	{
-		g_d3d12_device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(pPipelineState.GetAddressOf()));
+		HRESULT hr = g_d3d12_device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(pPipelineState.GetAddressOf()));
 	}
 
 	void Impl_GraphicsPipelineState::SetRootSignature(RootSignature* pRootSignature)

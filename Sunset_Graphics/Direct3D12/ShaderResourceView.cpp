@@ -34,6 +34,7 @@ namespace DX12
 		UINT GetDescriptorHandleIncrementSize() override;
 
 		void CreateCommitedResourceFromTexMetadata(DirectX::TexMetadata metadata);
+		void Create();
 
 		void SetRowPitch(size_t row_pitch);
 
@@ -139,9 +140,23 @@ namespace DX12
 			&desc,
 			D3D12_RESOURCE_STATE_COPY_DEST,
 			nullptr,
-			IID_PPV_ARGS(&m_srv)
+			IID_PPV_ARGS(m_srv.GetAddressOf())
 		);
 	}
+
+	void Impl_ShaderResourceView::Create()
+	{
+		D3D12_RESOURCE_DESC desc = m_srv->GetDesc();
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Format = desc.Format;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = static_cast<UINT>(desc.MipLevels);
+
+		DX12::g_d3d12_device->CreateShaderResourceView(m_srv.Get(), &srvDesc, m_pHeap->GetCPUDescriptorHandle());
+	}
+
 	void Impl_ShaderResourceView::SetRowPitch(size_t row_pitch)
 	{
 		m_RowPitch = row_pitch;
@@ -191,27 +206,31 @@ BOOL LoadShaderResourceView(
 
 	// ヒープのプロパティ
 	D3D12_HEAP_PROPERTIES prop;
-	prop.Type = D3D12_HEAP_TYPE_UPLOAD;						// cpuは書き込み、gpuは読み取り
-	prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;	// プロパティ不明
-	prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;	// プール不明
-	prop.CreationNodeMask = 1;
-	prop.VisibleNodeMask = 1;
+	{
+		prop.Type = D3D12_HEAP_TYPE_UPLOAD;						// cpuは書き込み、gpuは読み取り
+		prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;	// プロパティ不明
+		prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;	// プール不明
+		prop.CreationNodeMask = 1;
+		prop.VisibleNodeMask = 1;
+	}
 
 	// リソースの設定
 	D3D12_RESOURCE_DESC desc;
-	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	desc.Alignment = 0;
-	desc.Width = pImage->slicePitch;
-	desc.Height = 1;
-	desc.DepthOrArraySize = 1;
-	desc.MipLevels = 1;
-	desc.Format = DXGI_FORMAT_UNKNOWN;  // なし
-	desc.SampleDesc.Count = 1;
-	desc.SampleDesc.Quality = 0;
-	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;   // データを連続して配置する
-	desc.Flags = D3D12_RESOURCE_FLAG_NONE;  // なし
+	{
+		desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		desc.Alignment = 0;
+		desc.Width = pImage->slicePitch;
+		desc.Height = 1;
+		desc.DepthOrArraySize = 1;
+		desc.MipLevels = 1;
+		desc.Format = DXGI_FORMAT_UNKNOWN;  // なし
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;   // データを連続して配置する
+		desc.Flags = D3D12_RESOURCE_FLAG_NONE;  // なし
+	}
 
-	ID3D12Resource* m_pTextureUpload;
+	ComPtr<ID3D12Resource> m_pTextureUpload;
 
 	// データアップロード用のリソースを作成
 	hr = DX12::g_d3d12_device->CreateCommittedResource(
@@ -224,48 +243,31 @@ BOOL LoadShaderResourceView(
 	);
 
 	UINT8* pDataBegin;
-	// リソースデータのポインターを取得
-	hr = m_pTextureUpload->Map(
-		0,          // インデックス番号
-		nullptr,    // リソース全体
-		reinterpret_cast<void**>(&pDataBegin)
-	);
 
-	// バッファーに情報をコピー
+	hr = m_pTextureUpload->Map(0, nullptr, reinterpret_cast<void**>(&pDataBegin));
 	memcpy(pDataBegin, pImage->pixels, pImage->slicePitch);
-	// 取得したポインターを無効にする
 	m_pTextureUpload->Unmap(0, nullptr);
 
 	/* コピー先リソース作成 */
 	CreateShaderResourceView(ppShaderResourceView, metadata, pImage->rowPitch);
-
 
 	Command* pCommand = DX12::m_pCopyCommand;
 	
 	pCommand->Begin();
 	ID3D12GraphicsCommandList* pCmdList = pCommand->GetCommandList();
 	
-	ComPtr<ID3D12Resource> resource = ((DX12::Impl_ShaderResourceView*)ppShaderResourceView)->m_srv;
+	ComPtr<ID3D12Resource> resource = ((DX12::Impl_ShaderResourceView*)(*ppShaderResourceView))->m_srv;
+	desc = resource->GetDesc();
 
-	D3D12_RESOURCE_DESC desc = resource->GetDesc();
-
-	// テクスチャのコピー情報
 	D3D12_TEXTURE_COPY_LOCATION dest;
-	// コピー先
 	dest.pResource = resource.Get();
-	// 種類
 	dest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-	// サブリソースのインデックス
 	dest.SubresourceIndex = 0;
 
 	D3D12_TEXTURE_COPY_LOCATION src;
-	// コピー元
-	src.pResource = m_pTextureUpload;
-	// 種類
+	src.pResource = m_pTextureUpload.Get();
 	src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-	// オフセット
 	src.PlacedFootprint.Offset = 0;
-	// リソースの情報
 	src.PlacedFootprint.Footprint.Format = desc.Format;
 	src.PlacedFootprint.Footprint.Width = static_cast<UINT>(desc.Width);
 	src.PlacedFootprint.Footprint.Height = static_cast<UINT>(desc.Height);
@@ -287,21 +289,22 @@ BOOL LoadShaderResourceView(
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 	barrier.Transition.pResource = resource.Get();
-	// コピー先
+
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-	// ピクセルシェーダー
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	pCmdList->ResourceBarrier(1, &barrier);
 
-	pCmdList->Close();
+	hr = pCmdList->Close();
 
 	ID3D12CommandList* ppCmdLists[] = { pCmdList };
 	pCommand->GetCommandQueue()->ExecuteCommandLists(1, ppCmdLists);
 
+	pCommand->Wait(nullptr);
 	
-	pCommand->WaitForLastSubmittedFrame();
-
+	((DX12::Impl_ShaderResourceView*)(*ppShaderResourceView))->Create();
+	
 	// コピーへ移行
 	//m_State = STATE_COPY;
 

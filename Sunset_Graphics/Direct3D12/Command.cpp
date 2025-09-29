@@ -84,10 +84,11 @@ namespace DX12
 
 			for (UINT i = 0; i < 2; i++)
 				hr = g_d3d12_device->CreateCommandAllocator(
-					D3D12_COMMAND_LIST_TYPE_DIRECT, 
+					_type,
 					IID_PPV_ARGS(m_frameContext[i].cmdAlloc.GetAddressOf())
 				);
 		}
+
 
 		{
 			hr = g_d3d12_device->CreateCommandList(
@@ -109,7 +110,7 @@ namespace DX12
 
 	void Impl_Command::Begin()
 	{
-		ID3D12CommandAllocator* alloc = currentFrameCtx->cmdAlloc.Get();
+		ID3D12CommandAllocator* alloc = m_frameContext[0].cmdAlloc.Get();
 
 		HRESULT hr = alloc->Reset();
 		hr = cmdList->Reset(alloc, nullptr);
@@ -138,24 +139,6 @@ namespace DX12
 		currentFrameCtx = &m_frameContext[m_frameIndex % 2];
 		cmdQueue->Signal(fence.Get(), currentFrameCtx->m_fenceValue);
 		currentFrameCtx->m_fenceValue = g_fenceLastSignaledValue;
-
-		// 次のフレームの描画準備がまだであれば待機する.
-		//if (fence->GetCompletedValue() < m_fenceValue)
-		//{
-		//	auto event = CreateEvent(nullptr, false, false, nullptr);
-		//	// 完了時にイベントを設定.
-		//	auto hr = fence->SetEventOnCompletion(m_fenceValue, event);
-		//	if (FAILED(hr))
-		//	{
-		//		return;
-		//	}
-		//	// 待機処理.
-		//	if (WAIT_OBJECT_0 != WaitForSingleObject(event, INFINITE))
-		//	{
-		//		return;
-		//	}
-		//	CloseHandle(event);
-		//}
 
 		return;
 	}
