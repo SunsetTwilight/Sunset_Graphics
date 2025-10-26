@@ -1,11 +1,10 @@
 #include "DirectX_GI.h"
 #include "../sunset_graphics_pch.h"
 
+#include <wrl.h>
 #include <dxgi1_6.h>
-
 #include <d3d11_4.h>
 #include <d3d12.h>
-#include <wrl.h>
 
 #include <vector>
 #include <string>
@@ -57,7 +56,7 @@ namespace DXGI
 			MessageBox(NULL, L"ErrorCode_0003 : Get Process CreateDXGIFactory2()", L"Failed                                                                                                                         ", MB_OK | MB_ICONERROR);
 			MessageBox(NULL, L"Exit Application", L"ErrorCode : 0003                                                                                                               ", MB_OK | MB_ICONERROR);
 			exit(0003);
-
+		
 			return FALSE;
 		}
 

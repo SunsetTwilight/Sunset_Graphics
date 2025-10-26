@@ -14,7 +14,7 @@ class FrameBuffer;
 struct FrameContext 
 {
 	ComPtr<ID3D12CommandAllocator> cmdAlloc;
-	UINT m_fenceValue = 0;
+	UINT64 m_fenceValue = 0;
 };
 
 class SUNSET_GRAPHICS_CLASS Command
@@ -27,6 +27,8 @@ public:
 	virtual void Begin(FrameBuffer* pFrameBuffer) = 0;
 		
 	virtual void Close() = 0;
+
+	virtual void WaitStart() = 0;
 
 	virtual void Wait(FrameBuffer* pFrameBuffer) = 0;
 

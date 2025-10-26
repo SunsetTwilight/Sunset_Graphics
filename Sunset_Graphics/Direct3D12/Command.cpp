@@ -27,6 +27,8 @@ namespace DX12
 		void Begin(FrameBuffer* pFrameBuffer) override;
 		void Close() override;
 
+		void WaitStart() override;
+
 		void Wait(FrameBuffer* pFrameBuffer) override;
 
 		void WaitForLastSubmittedFrame() override;
@@ -43,19 +45,28 @@ namespace DX12
 		ComPtr<ID3D12Fence> fence;
 		UINT m_fenceValue = 0;
 
+		UINT64 m_fenceLastSignaledValue = 0;
+
 		FrameContext m_frameContext[2];
 		UINT m_frameIndex;
 
 		FrameContext* currentFrameCtx;
 
+		bool m_isWaiting = false;
+
+		HANDLE m_fance_event;
 	};
 
 	Impl_Command::Impl_Command()
 	{
+		m_fance_event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		if (m_fance_event == nullptr)
+			return;
 	}
 
 	Impl_Command::~Impl_Command()
 	{
+		CloseHandle(m_fance_event);
 	}
 
 	BOOL Impl_Command::Create(D3D12_COMMAND_LIST_TYPE _type)
@@ -122,6 +133,11 @@ namespace DX12
 		ID3D12CommandAllocator* alloc = currentFrameCtx->cmdAlloc.Get();
 
 		HRESULT hr = alloc->Reset();
+		if (hr != S_OK) {
+
+			MessageBox(NULL, L"", L"", NULL);
+		}
+
 		hr = cmdList->Reset(alloc, nullptr);
 	}
 
@@ -130,40 +146,44 @@ namespace DX12
 		cmdList->Close();
 	}
 
-	UINT64 g_fenceLastSignaledValue = 0;
+	void Impl_Command::WaitStart()
+	{
+		m_isWaiting = true;
+	}
 
 	void Impl_Command::Wait(FrameBuffer* pFrameBuffer)
 	{
 		//•`‰æI—¹‘Ò‚¿
-		g_fenceLastSignaledValue++;
+		UINT64 fenceValue = m_fenceLastSignaledValue + 1;
 		currentFrameCtx = &m_frameContext[m_frameIndex % 2];
-		cmdQueue->Signal(fence.Get(), currentFrameCtx->m_fenceValue);
-		currentFrameCtx->m_fenceValue = g_fenceLastSignaledValue;
+		cmdQueue->Signal(fence.Get(), fenceValue);
+		m_fenceLastSignaledValue = fenceValue;
+		currentFrameCtx->m_fenceValue = fenceValue;
+
+		m_isWaiting = false;
 
 		return;
 	}
 
 	void Impl_Command::WaitForLastSubmittedFrame()
 	{
-		FrameContext* frameCtx = &m_frameContext[m_frameIndex % 2];
+		if (m_isWaiting) {
 
-		UINT64 fenceValue = frameCtx->m_fenceValue;
-		if (fenceValue == 0) 
-			return; // No fence was signaled
+			FrameContext* frameCtx = &m_frameContext[m_frameIndex % 2];
+		
+			UINT64 fenceValue = frameCtx->m_fenceValue;
+			if (fenceValue == 0)
+				return; // No fence was signaled
 
-		frameCtx->m_fenceValue = 0;
-		if (fence->GetCompletedValue() >= fenceValue)
-			return;
+			frameCtx->m_fenceValue = 0;
+			if (fence->GetCompletedValue() >= fenceValue)
+				return;
 
-		auto event = CreateEvent(nullptr, false, false, nullptr);
-
-		fence->SetEventOnCompletion(m_fenceValue, event);
-		// ‘Ò‹@ˆ—.
-		if (WAIT_OBJECT_0 != WaitForSingleObject(event, INFINITE))
-		{
-			return;
+			fence->SetEventOnCompletion(fenceValue, m_fance_event);
+			WaitForSingleObject(m_fance_event, INFINITE);
+			
+			m_isWaiting = false;
 		}
-		CloseHandle(event);
 	}
 
 	FrameContext* Impl_Command::WaitForNextFrameResources(FrameBuffer* pFrameBuffer)
@@ -171,25 +191,26 @@ namespace DX12
 		UINT nextFrameIndex = m_frameIndex + 1;
 		m_frameIndex = nextFrameIndex;
 
-		HANDLE waitableObjects[] = { pFrameBuffer->GetSwapChainHandle(), nullptr};
+		HANDLE waitableObjects[] = { pFrameBuffer->GetSwapChainHandle(), nullptr };
 		DWORD numWaitableObjects = 1;
-
-		HANDLE event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 		FrameContext* frameCtx = &m_frameContext[nextFrameIndex % 2];
 		UINT64 fenceValue = frameCtx->m_fenceValue;
 		if (fenceValue != 0) // means no fence was signaled
 		{
 			frameCtx->m_fenceValue = 0;
-
-			fence->SetEventOnCompletion(fenceValue, event);
-			waitableObjects[1] = event;
+			HRESULT hr = fence->SetEventOnCompletion(fenceValue, m_fance_event);
+			waitableObjects[1] = m_fance_event;
 			numWaitableObjects = 2;
 		}
 
-		WaitForSingleObject(waitableObjects[0], INFINITE);
+		WaitForMultipleObjects(numWaitableObjects, waitableObjects, TRUE, 1000);
+		
+		/*std::wstring message = L"fenceValue:" + std::to_wstring(fenceValue) + L'\n';
+		message += L"nextFrameIndex:" + std::to_wstring(nextFrameIndex);
+		MessageBox(NULL, message.c_str(), L"Variable Display", MB_OK);*/
 
-		CloseHandle(event);
+		m_isWaiting = false;
 
 		return frameCtx;
 	}

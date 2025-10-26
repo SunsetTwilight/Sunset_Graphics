@@ -190,7 +190,8 @@ BOOL CreateShaderResourceView(
 
 BOOL LoadShaderResourceView(
 	ShaderResourceView** ppShaderResourceView, 
-	const wchar_t* szFile)
+	const wchar_t* szFile, 
+	Command* pCommand)
 {
 	DirectX::TexMetadata metadata;
 	DirectX::ScratchImage image;
@@ -251,8 +252,7 @@ BOOL LoadShaderResourceView(
 	/* コピー先リソース作成 */
 	CreateShaderResourceView(ppShaderResourceView, metadata, pImage->rowPitch);
 
-	Command* pCommand = DX12::m_pCopyCommand;
-	
+
 	pCommand->Begin();
 	ID3D12GraphicsCommandList* pCmdList = pCommand->GetCommandList();
 	

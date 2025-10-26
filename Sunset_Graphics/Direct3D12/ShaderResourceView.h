@@ -8,6 +8,8 @@
 
 #include "DescriptorHeap.h"
 
+class Command;
+
 class SUNSET_GRAPHICS_CLASS ShaderResourceView : 
     public DescriptorHeap
 {
@@ -27,11 +29,12 @@ SUNSET_GRAPHICS_API BOOL CreateShaderResourceView(
 
 typedef BOOL(*PfnLoadShaderResourceView)(
     ShaderResourceView** ppShaderResourceView,
-    const wchar_t* szFile
-    );
+    const wchar_t* szFile,
+    Command* pCommand);
+
 SUNSET_GRAPHICS_API BOOL LoadShaderResourceView(
     ShaderResourceView** ppShaderResourceView,
-    const wchar_t* szFile
-);
+    const wchar_t* szFile,
+    Command* pCommand);
 
 #endif // !_SHADER_RESOURCE_VIEW_H_

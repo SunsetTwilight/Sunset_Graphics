@@ -32,17 +32,17 @@ namespace DX12
 	PFN_D3D12_CREATE_ROOT_SIGNATURE_DESERIALIZER			D3D12CreateRootSignatureDeserializer;
 	PFN_D3D12_SERIALIZE_VERSIONED_ROOT_SIGNATURE			D3D12SerializeVersionedRootSignature;
 	PFN_D3D12_CREATE_VERSIONED_ROOT_SIGNATURE_DESERIALIZER	D3D12CreateVersionedRootSignatureDeserializer;
-	
+
 	PFN_D3D12_CREATE_DEVICE									D3D12CreateDevice = nullptr;
 	PFN_D3D12_GET_DEBUG_INTERFACE							D3D12GetDebugInterface = nullptr;
 
 	PFN_D3D12_GET_INTERFACE									D3D12GetInterface = nullptr;
-	
+
 	ComPtr<ID3D12Debug>			m_d3d12_debug{};
 	ComPtr<ID3D12Device>		g_d3d12_device{};	//Direct3D12のデバイスの実体
 	ComPtr<ID3D12CommandQueue>	cmd_queue{};
 
-	Command* m_pCopyCommand = nullptr;		/* リソースコピー用コマンド */
+	//Command* m_pCopyCommand = nullptr;		/* リソースコピー用コマンド */
 
 //------------------------------------------------------------------------------------------------
 //関数定義
@@ -116,7 +116,7 @@ namespace DX12
 			retInit = FALSE;
 		}
 
-		CreateCommand(&m_pCopyCommand);
+		//CreateCommand(&m_pCopyCommand);
 
 		return retInit;
 	}
@@ -130,7 +130,7 @@ namespace DX12
 	{
 		BOOL retCleanUp = TRUE;	//正常（初期値）
 
-		delete(m_pCopyCommand);
+		//delete(m_pCopyCommand);
 
 		if (m_d3d12_debug.Reset() != 0) {
 			//Error(参照カウントが１以上なので、どこかで使用されたまま)
@@ -234,6 +234,11 @@ namespace DX12
 			//生成失敗
 			throw std::runtime_error("Failed CreateDevice!");
 		}
+
+		ComPtr<ID3D12DebugDevice> debugDevice;
+		g_d3d12_device.As(&debugDevice); // m_device が ComPtr<ID3D12Device> な場合
+
+		debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
 
 		DXGI::SetUseAdapter(adapter1.Get());
 		return TRUE;
